@@ -19,14 +19,16 @@
 
 package org.matsim.contrib.minibus.hook;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 //import javax.inject.Inject;
 
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.minibus.PConfigGroup;
 import org.matsim.contrib.minibus.PConstants.OperatorState;
 import org.matsim.contrib.minibus.fare.StageContainerCreator;
@@ -47,6 +49,7 @@ import org.matsim.contrib.minibus.scoring.routeDesignScoring.RouteDesignScoringM
 import org.matsim.core.controler.events.IterationStartsEvent;
 import org.matsim.core.controler.events.ScoringEvent;
 import org.matsim.core.controler.events.StartupEvent;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.pt.transitSchedule.TransitScheduleFactoryImpl;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.transitSchedule.api.TransitScheduleWriter;
@@ -149,6 +152,57 @@ public final class PBox implements POperators {
 		for (Operator operator : this.operators) {
 			this.pTransitSchedule.addTransitLine(operator.getCurrentTransitLine());
 		}
+
+// create subsidy distribution
+		HashMap<Id<TransitStopFacility>, Double> actBasedSub = new HashMap<>();
+		if(this.pConfig.getUseSubsidyApproach()) {
+			HashMap<Coord, Integer> nbActivities = new HashMap<>();
+			HashMap<TransitStopFacility, List<Integer>> nbActivitiesAroundStop = new HashMap<>();
+			for (Person person : event.getServices().getScenario().getPopulation().getPersons().values()) {
+				for (PlanElement pE : person.getSelectedPlan().getPlanElements()) {
+					if (pE instanceof Activity) {
+						Activity act = (Activity) pE;
+						if (!act.getType().equals("pt interaction") && !act.getType().equals("outside")) {
+							nbActivities.putIfAbsent(act.getCoord(), 0);
+							nbActivities.put(act.getCoord(), nbActivities.get(act.getCoord()) + 1);
+						}
+					}
+				}
+			}
+
+			for (TransitStopFacility stop : this.pStopsOnly.getFacilities().values()) {
+				nbActivitiesAroundStop.putIfAbsent(stop, new ArrayList<>(Arrays.asList(0,0)));
+				for (Coord actCoord : nbActivities.keySet()) {
+					if(NetworkUtils.getEuclideanDistance(actCoord, stop.getCoord()) < 500)  {
+						int nbActs = nbActivities.get(actCoord);
+						nbActivitiesAroundStop.get(stop).set(0, nbActivitiesAroundStop.get(stop).get(0) + nbActs);
+					}
+					if(NetworkUtils.getEuclideanDistance(actCoord, stop.getCoord()) < 3000)  {
+						int nbActs = nbActivities.get(actCoord);
+						nbActivitiesAroundStop.get(stop).set(1, nbActivitiesAroundStop.get(stop).get(1) + nbActs);
+					}
+				}
+			}
+
+			int counter = 0;
+//			double activitiessum=0;
+//			int counter1 = 0;
+			for(TransitStopFacility stop: nbActivitiesAroundStop.keySet())	{
+				double activities = nbActivitiesAroundStop.get(stop).get(0)+ (0.1 * nbActivitiesAroundStop.get(stop).get(1));
+//				activitiessum=activitiessum+activities;
+//				counter1++;
+				double subsidies = 150 - ( 20 * Math.pow(2, (activities * 0.0021) ) );
+				if(subsidies > 0.0)	{
+					counter++;
+					actBasedSub.put(stop.getId(), subsidies);
+				}
+			}
+//			log.info("###########################mean activtites"+activitiessum/counter1);
+//			log.info("number of subsidized stops: " + counter);
+		}
+
+		this.ticketMachine.setActBasedSubs(actBasedSub);
+
 
 		// Reset the franchise system - TODO necessary?
 		this.franchise.reset(this.operators);

@@ -86,11 +86,11 @@ public final class RunMinibus {
 
 
 	public static void main(final String[] args) {
-		Config config = ConfigUtils.loadConfig( "/Users/MeyerMa/IdeaProjects/data-science-matsim/jobs-infra/docker-build/input/minibus/config_minibus_human_driven_600it.xml", new PConfigGroup() ) ;
+		Config config = ConfigUtils.loadConfig( "/Users/MeyerMa/Desktop/MA/scenarios/berlin/output/minibus_human_400it_seed1/van_human_driven_plans_all_modes_iter_400_seed_1.output_config.xml", new PConfigGroup() ) ;
 //		Config config = ConfigUtils.loadConfig("/Users/MeyerMa/IdeaProjects/minibus_meyer/Input/config.xml", new PConfigGroup() ) ;
 		config.network().setInputFile("/Users/MeyerMa/IdeaProjects/data-science-matsim/jobs-infra/docker-build/input/minibus/berlin-v5.5.3-1pct.output_network.xml.gz");
 		config.global().setCoordinateSystem("EPSG:31468");
-		config.global().setRandomSeed(1);
+		config.global().setRandomSeed(8);
 		config.plans().setInputFile("/Users/MeyerMa/IdeaProjects/data-science-matsim/jobs-infra/docker-build/input/minibus/berlin-v5.4-1pct.plans_activity_inside_prep.xml");
 		config.plans().setRemovingUnneccessaryPlanAttributes(true);
 		config.transit().setTransitScheduleFile("/Users/MeyerMa/IdeaProjects/data-science-matsim/jobs-infra/docker-build/input/minibus/berlin-v5.5.3-1pct.output_transitSchedule_no_bus_in_spandau.xml.gz");
@@ -99,12 +99,11 @@ public final class RunMinibus {
 //		config.facilities().setInputFile();
 
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory("/Users/MeyerMa/Desktop/MA/scenarios/berlin/output/minibus_human_600it_seed1");
-
+		config.controler().setOutputDirectory("/Users/MeyerMa/Desktop/MA/scenarios/berlin/output/subsidy/original_manser_alpha_600_beta_5");
 		config.plans().setHandlingOfPlansWithoutRoutingMode(useMainModeIdentifier);
 		Scenario scenario = ScenarioUtils.loadScenario(config);
-		config.controler().setRunId("seed_1");
-		config.controler().setLastIteration(600);
+		config.controler().setRunId("subsidy_600_5");
+		config.controler().setLastIteration(400);
 
 
 
@@ -135,11 +134,15 @@ public final class RunMinibus {
 
 
 
-		// if desired, add subsidy approach here
-//		PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.class);
-//		pConfig.setSubsidyApproach("perPassenger");
+		boolean subsidies = true;
+		if (subsidies) {
+			PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.class);
+			pConfig.setUseSubsidyApproach(true);
+		}
+
 
 		controler.run();
+
 	}
 
 }

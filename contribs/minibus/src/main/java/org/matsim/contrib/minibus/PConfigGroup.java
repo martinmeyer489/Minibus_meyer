@@ -87,6 +87,7 @@ public final class PConfigGroup extends ConfigGroup{
 	private static final String MIN_OPERATION_TIME = "minOperationTime";
 	private static final String MIN_INITIAL_STOP_DISTANCE = "minInitialStopDistance";
 	private static final String USEFRANCHISE = "useFranchise";
+	private static final String USESUBSIDYAPPROACH = "useSubsidies";
 	private static final String WRITESTATS_INTERVAL = "writeStatsInterval";
 	private static final String LOG_OPERATORS = "logOperators";
 	private static final String LOG_ROUTE_DESIGN_VS_TOTAL_SCORE = "logRouteDesignVsTotalScore";
@@ -147,6 +148,7 @@ public final class PConfigGroup extends ConfigGroup{
 	private double pricePerVehicleBought = 1000.0;
 	private double pricePerVehicleSold = 1000.0;
 	private boolean useFranchise = false;
+	private boolean useSubsidyApproach = false;
 	private int writeStatsInterval = 0;
 	private boolean logOperators = false;
 	private LogRouteDesignVsTotalScore logRouteDesignVsTotalScore = LogRouteDesignVsTotalScore.no;
@@ -248,7 +250,9 @@ public final class PConfigGroup extends ConfigGroup{
 			this.minInitialStopDistance = Double.parseDouble(value);
 		} else if (USEFRANCHISE.equals(key)){
 			this.useFranchise = Boolean.parseBoolean(value);
-		} else if (WRITESTATS_INTERVAL.equals(key)){
+		}else if (USESUBSIDYAPPROACH.equals(key)){
+			this.useSubsidyApproach = Boolean.parseBoolean(value);
+		}else if (WRITESTATS_INTERVAL.equals(key)){
 			this.writeStatsInterval = Integer.parseInt(value);
 		} else if (LOG_OPERATORS.equals(key)){
 			this.logOperators = Boolean.parseBoolean(value);		
@@ -350,6 +354,7 @@ public final class PConfigGroup extends ConfigGroup{
 		map.put(MIN_OPERATION_TIME, Double.toString(this.minOperationTime));
 		map.put(MIN_INITIAL_STOP_DISTANCE, Double.toString(this.minInitialStopDistance));
 		map.put(USEFRANCHISE, Boolean.toString(this.useFranchise));
+		map.put(USESUBSIDYAPPROACH, Boolean.toString(this.useSubsidyApproach));
 		map.put(WRITESTATS_INTERVAL, Integer.toString(this.writeStatsInterval));
 		map.put(LOG_OPERATORS, Boolean.toString(this.logOperators));
 		map.put(LOG_ROUTE_DESIGN_VS_TOTAL_SCORE, this.logRouteDesignVsTotalScore.toString());
@@ -416,6 +421,7 @@ public final class PConfigGroup extends ConfigGroup{
 		map.put(MIN_OPERATION_TIME, "min time of operation of each operator in seconds");
 		map.put(MIN_INITIAL_STOP_DISTANCE, "min distance the two initial stops of a new operator's first route should be apart. Default is 1.0. Set to 0.0 to allow for the same stop being picked as start and end stop.");
 		map.put(USEFRANCHISE, "Will use a franchise system if set to true");
+		map.put(USESUBSIDYAPPROACH, "Will use the subsidy approach if set to true");
 		map.put(WRITESTATS_INTERVAL, "interval in which statistics will be plotted. Set to zero to turn this feature off. Set to something larger than the total number of iterations to turn off the plots, but write the statistics file anyway");
 		map.put(LOG_OPERATORS, "will log operators individually if set to true");
 		map.put(LOG_ROUTE_DESIGN_VS_TOTAL_SCORE, "will log total score before and after adding route design score. Values: " + LogRouteDesignVsTotalScore.no + " and " + LogRouteDesignVsTotalScore.onlyNonZeroRouteDesignScore);
@@ -644,6 +650,15 @@ public final class PConfigGroup extends ConfigGroup{
 	}
 	public String getSubsidyApproach() {
 		return this.subsidyApproach;
+	}
+
+
+	public boolean getUseSubsidyApproach() {
+		return this.useSubsidyApproach;
+	}
+
+	public void setUseSubsidyApproach( boolean useSubs )	{
+		this.useSubsidyApproach = useSubs;
 	}
 
 	public List<Integer> getTopoTypesForStops() {
