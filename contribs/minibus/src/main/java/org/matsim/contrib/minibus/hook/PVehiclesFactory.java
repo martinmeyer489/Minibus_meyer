@@ -53,29 +53,50 @@ class PVehiclesFactory {
 	public Vehicles createVehicles(TransitSchedule pTransitSchedule){		
 		Vehicles vehicles = VehicleUtils.createVehiclesContainer();		
 		VehiclesFactory vehFactory = vehicles.getFactory();
-		VehicleType vehType = vehFactory.createVehicleType(Id.create(this.pConfig.getPIdentifier(), VehicleType.class));
-//		VehicleCapacity capacity = new VehicleCapacity();
-		vehType.getCapacity().setSeats(this.pConfig.getPaxPerVehicle()); // 2018-11 the driver no longer takes one seat
-		vehType.getCapacity().setStandingRoom(0);
-//		vehType.setCapacity(capacity);
-		vehType.setPcuEquivalents(this.pConfig.getPassengerCarEquivalents());
-		vehType.setMaximumVelocity(this.pConfig.getVehicleMaximumVelocity());
-        VehicleUtils.setAccessTime(vehType, this.pConfig.getDelayPerBoardingPassenger());
-		VehicleUtils.setEgressTime(vehType, this.pConfig.getDelayPerAlightingPassenger());
-		VehicleUtils.setDoorOperationMode(vehType, this.pConfig.getDoorOperationMode()) ;
-		vehicles.addVehicleType( vehType);
-	
+
+
+//		VehicleType vehType = vehFactory.createVehicleType(Id.create(this.pConfig.getPIdentifier(), VehicleType.class));
+////		VehicleCapacity capacity = new VehicleCapacity();
+//		vehType.getCapacity().setSeats(this.pConfig.getPaxPerVehicle()); // 2018-11 the driver no longer takes one seat
+//		vehType.getCapacity().setStandingRoom(0);
+////		vehType.setCapacity(capacity);
+//		vehType.setPcuEquivalents(this.pConfig.getPassengerCarEquivalents());
+//		vehType.setMaximumVelocity(this.pConfig.getVehicleMaximumVelocity());
+//        VehicleUtils.setAccessTime(vehType, this.pConfig.getDelayPerBoardingPassenger());
+//		VehicleUtils.setEgressTime(vehType, this.pConfig.getDelayPerAlightingPassenger());
+//		VehicleUtils.setDoorOperationMode(vehType, this.pConfig.getDoorOperationMode()) ;
+//		vehicles.addVehicleType( vehType);
+
+
+		// create different vehicle types
+		for (PConfigGroup.PVehicleSettings settings : pConfig.getPVehicleSettings()) {
+			String type = settings.getPVehicleName();
+			VehicleType vehType = vehFactory.createVehicleType(Id.create(type, VehicleType.class));
+
+			vehType.getCapacity().setSeats(settings.getCapacityPerVehicle() + 1);
+
+			vehType.setPcuEquivalents(this.pConfig.getPassengerCarEquivalents());
+			vehType.setMaximumVelocity(this.pConfig.getVehicleMaximumVelocity());
+			vehicles.addVehicleType( vehType);
+		}
+
 		for (TransitLine line : pTransitSchedule.getTransitLines().values()) {
 			for (TransitRoute route : line.getRoutes().values()) {
 				for (Departure departure : route.getDepartures().values()) {
 					if (!vehicles.getVehicles().keySet().contains(departure.getVehicleId())) {
-						Vehicle vehicle = vehFactory.createVehicle(departure.getVehicleId(), vehType);
-						vehicles.addVehicle( vehicle);
+						for (PConfigGroup.PVehicleSettings settings : this.pConfig.getPVehicleSettings()) {
+							String type = settings.getPVehicleName();
+							if(departure.getVehicleId().toString().contains(type))	{
+								Vehicle vehicle = vehFactory.createVehicle(departure.getVehicleId(),
+										vehicles.getVehicleTypes().get(Id.create(type, VehicleType.class)));
+								vehicles.addVehicle( vehicle);
+							}
+						}
+
 					}
 				}
 			}
 		}
-		
 		return vehicles;
 	}
 }

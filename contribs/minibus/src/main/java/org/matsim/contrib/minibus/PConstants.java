@@ -34,6 +34,9 @@ public final class PConstants {
 	public enum OperatorState {
 	    PROSPECTING, INBUSINESS, BANKRUPT
 	}
+	public enum VehicleTypes {
+		ARTICULATED, STANDARD, MINI
+	}
 	
 	private PConstants() {
 		

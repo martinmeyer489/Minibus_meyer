@@ -54,7 +54,9 @@ public final class PPlan implements Comparable<PPlan>{
 	private double startTime;
 	private double endTime;
 	private int nVehicles;
-	
+	private String pVehicleType;
+
+
 	private ArrayList<TransitStopFacility> stopsToBeServed;
 
 	private Set<Id<Vehicle>> vehicleIds;
@@ -146,6 +148,14 @@ public final class PPlan implements Comparable<PPlan>{
 	
 	public void setNVehicles(int nVehicles){
 		this.nVehicles = nVehicles;
+	}
+
+	public String getPVehicleType()	{
+		return this.pVehicleType;
+	}
+
+	public void setPVehicleType(String pVehicleType)	{
+		this.pVehicleType = pVehicleType;
 	}
 
 	public ArrayList<TransitStopFacility> getStopsToBeServed() {

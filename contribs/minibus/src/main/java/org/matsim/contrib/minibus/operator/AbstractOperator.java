@@ -19,6 +19,7 @@
 
 package org.matsim.contrib.minibus.operator;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,8 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.contrib.minibus.PConfigGroup;
+import org.matsim.contrib.minibus.PConfigGroup.PVehicleSettings;
+
 import org.matsim.contrib.minibus.PConfigGroup.LogRouteDesignVsTotalScore;
 import org.matsim.contrib.minibus.PConstants.OperatorState;
 import org.matsim.contrib.minibus.performance.PTransitLineMerger;
@@ -76,6 +79,8 @@ abstract class AbstractOperator implements Operator{
 	int currentIteration;
 	
 	private final LogRouteDesignVsTotalScore logRouteDesignVsTotalScore;
+	private Collection<PVehicleSettings> pVehicleSettings;
+
 
 	AbstractOperator(Id<Operator> id, PConfigGroup pConfig, PFranchise franchise){
 		this.id = id;
@@ -115,7 +120,11 @@ abstract class AbstractOperator implements Operator{
 			RouteDesignScoringManager routeDesignScoringManager) {
 		this.setScoreLastIteration(this.getScore());
 		this.setScore(0);
-		
+		int seats = 0;
+
+		String pVehicleType = null;
+
+
 		// score all plans
 		for (PPlan plan : this.getAllPlans()) {
 			scorePlan(pScores, plan, routeDesignScoringManager);
@@ -132,15 +141,52 @@ abstract class AbstractOperator implements Operator{
 			for (TransitRoute route : plan.getLine().getRoutes().values()) {
 				route.setDescription(plan.toString(this.budget + this.getScore()));
 			}
+			int capacity = 0;
+			for (PVehicleSettings pVS : this.pVehicleSettings) {
+				if (plan.getPVehicleType().equals(pVS.getPVehicleName())) {
+					capacity = pVS.getCapacityPerVehicle();
+				}
+			}
+			if(plan.getNVehicles() * capacity >= seats)	{
+				pVehicleType = plan.getPVehicleType();
+				seats = plan.getNVehicles() * capacity;
+			}
+
+
+
 		}
 		
-		processScore();
+		processScore(pVehicleType);
 	}
 	
-	void processScore() {
+	void processScore(String pVehicleType) {
 		// score all vehicles not associated with plans
-		setScore(getScore() - this.numberOfVehiclesInReserve * this.costPerVehicleAndDay);
-		
+		double costPerVehicleDay = 0;
+		double costPerVehicleSell = 0;
+		String vehicleType = null;
+
+		// I think this happens if the operator has no more plan
+		if (getBestPlan() == null)
+			vehicleType = pVehicleType;
+		else
+			vehicleType = getBestPlan().getPVehicleType();
+
+		if (vehicleType == null)
+			vehicleType = "Gelenkbus";
+
+
+		for (PConfigGroup.PVehicleSettings pVS : this.pVehicleSettings) {
+			if (vehicleType.equals(pVS.getPVehicleName())) {
+				costPerVehicleDay = pVS.getCostPerVehicleAndDay();
+				costPerVehicleSell = pVS.getCostPerVehicleSold();
+			}
+		}
+
+
+		score -= this.numberOfVehiclesInReserve * costPerVehicleDay;
+
+
+
 		if (this.getScore() > 0.0) {
 			this.operatorState = OperatorState.INBUSINESS;
 		}
@@ -160,7 +206,7 @@ abstract class AbstractOperator implements Operator{
 		// check, if bankrupt
 		if(this.budget < 0){
 			// insufficient, sell vehicles
-			int numberOfVehiclesToSell = -1 * Math.min(-1, (int) Math.floor(this.budget / this.costPerVehicleSell));
+			int numberOfVehiclesToSell = -1 * Math.min(-1, (int) Math.floor(this.budget / costPerVehicleSell));
 			
 			int numberOfVehiclesOwned = this.getNumberOfVehiclesOwned();
 			
@@ -285,6 +331,12 @@ abstract class AbstractOperator implements Operator{
 		for (Id<Vehicle> vehId : plan.getVehicleIds()) {
 			totalLineScore += driverId2ScoreMap.get(vehId).getTotalRevenue();
 			totalTripsServed += driverId2ScoreMap.get(vehId).getTripsServed();
+		}
+		double costPerVehicleDay = 0;
+		for (PConfigGroup.PVehicleSettings pVS : this.pVehicleSettings) {
+			if (plan.getPVehicleType().equals(pVS.getPVehicleName())) {
+				costPerVehicleDay = pVS.getCostPerVehicleAndDay();
+			}
 		}
 
 		totalLineScore = capAndAddRouteDesignScore (plan, totalLineScore, routeDesignScoringManager);

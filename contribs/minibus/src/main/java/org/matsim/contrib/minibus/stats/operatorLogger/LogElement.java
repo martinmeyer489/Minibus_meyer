@@ -50,6 +50,8 @@ public final class LogElement {
 	private OperatorState status;
 	private Id<PPlan> planId;
 	private String creatorId;
+	private String vehicleType;
+
 	private Id<PPlan> parentId;
 	private int nVeh;
 	private int nPax;
@@ -94,6 +96,12 @@ public final class LogElement {
 	}
 	public void setCreatorId(String creatorId) {
 		this.creatorId = creatorId;
+	}
+	public String getVehicleType() {
+		return vehicleType;
+	}
+	public void setVehicleType(String vehicleType) {
+		this.vehicleType = vehicleType;
 	}
 	public Id<PPlan> getParentId() {
 		return parentId;
@@ -159,6 +167,7 @@ public final class LogElement {
 		strB.append(DELIMITER).append("plan id");
 		strB.append(DELIMITER).append("creator");
 		strB.append(DELIMITER).append("parent");
+		strB.append(DELIMITER).append("vehicletype");
 		strB.append(DELIMITER).append("vehicle");
 		strB.append(DELIMITER).append("pax");
 		strB.append(DELIMITER).append("score");
@@ -178,6 +187,7 @@ public final class LogElement {
 		strB.append(DELIMITER).append(this.planId);
 		strB.append(DELIMITER).append(this.creatorId);
 		strB.append(DELIMITER).append(this.parentId);
+		strB.append(DELIMITER).append(this.vehicleType);
 		strB.append(DELIMITER).append(this.nVeh);
 		strB.append(DELIMITER).append(this.nPax);
 		strB.append(DELIMITER).append(this.score);

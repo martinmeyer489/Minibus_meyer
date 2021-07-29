@@ -356,4 +356,10 @@ public final class VehicleUtils {
 		}
 		return vehicle ;
 	}
+
+	static {
+		DEFAULT_VEHICLE_TYPE.getCapacity().setSeats(4);
+		tryStdCnt = 5;
+		tryTrnCnt = 5;
+	}
 }
