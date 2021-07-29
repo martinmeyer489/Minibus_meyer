@@ -86,7 +86,7 @@ public final class RunMinibus {
 
 
 	public static void main(final String[] args) {
-		Config config = ConfigUtils.loadConfig( "/Users/MeyerMa/Desktop/MA/scenarios/berlin/output/minibus_human_400it_seed1/van_human_driven_plans_all_modes_iter_400_seed_1.output_config.xml", new PConfigGroup() ) ;
+		Config config = ConfigUtils.loadConfig( "/Users/MeyerMa/Desktop/MA/scenarios/berlin/output/minibus_human_400it_seed2/minibus_human_driven_seed_2.output_config.xml", new PConfigGroup() ) ;
 //		Config config = ConfigUtils.loadConfig("/Users/MeyerMa/IdeaProjects/minibus_meyer/Input/config.xml", new PConfigGroup() ) ;
 		config.network().setInputFile("/Users/MeyerMa/IdeaProjects/data-science-matsim/jobs-infra/docker-build/input/minibus/berlin-v5.5.3-1pct.output_network.xml.gz");
 		config.global().setCoordinateSystem("EPSG:31468");
@@ -99,10 +99,10 @@ public final class RunMinibus {
 //		config.facilities().setInputFile();
 
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory("/Users/MeyerMa/Desktop/MA/scenarios/berlin/output/subsidy/subsidy_50_20_test");
+		config.controler().setOutputDirectory("/Users/MeyerMa/Desktop/MA/scenarios/berlin/output/subsidy/subsidy_300_50");
 		config.plans().setHandlingOfPlansWithoutRoutingMode(useMainModeIdentifier);
 		Scenario scenario = ScenarioUtils.loadScenario(config);
-		config.controler().setRunId("subsidy_50_20_act_500m");
+		config.controler().setRunId("subsidy_300_50");
 		config.controler().setLastIteration(400);
 
 

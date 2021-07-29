@@ -190,22 +190,22 @@ public final class PBox implements POperators {
 			}
 
 
-			File stops = new File("/Users/MeyerMa/Desktop/MA/scenarios/berlin/output/subsidy/activites.csv");
-			FileWriter fw_stops = new FileWriter(stops);
-			BufferedWriter bw_stops = new BufferedWriter(fw_stops);
-
-
-			bw_stops.write("stopID,stop coord x,stop coord y,activity total,activity 500,activity 3000,subsidy");
-			bw_stops.newLine();
+//			File stops = new File("/Users/MeyerMa/Desktop/MA/scenarios/berlin/output/subsidy/activites.csv");
+//			FileWriter fw_stops = new FileWriter(stops);
+//			BufferedWriter bw_stops = new BufferedWriter(fw_stops);
+//
+//
+//			bw_stops.write("stopID,stop coord x,stop coord y,activity total,activity 500,activity 3000,subsidy");
+//			bw_stops.newLine();
 
 			int counter = 0;
 
 			for(TransitStopFacility stop: nbActivitiesAroundStop.keySet())	{
 				double activities = nbActivitiesAroundStop.get(stop).get(0)+ (0.1 * nbActivitiesAroundStop.get(stop).get(1));
 				double subsidies = 300 - ( 50 * Math.pow(2, (activities * 0.0021) ) );
-
-				bw_stops.write(String.valueOf(stop.getId())+","+String.valueOf(stop.getCoord().getX())+","+String.valueOf(stop.getCoord().getY())+","+String.valueOf(activities) + "," + String.valueOf(nbActivitiesAroundStop.get(stop).get(0)) + "," + String.valueOf((0.1 * nbActivitiesAroundStop.get(stop).get(1)))+","+String.valueOf(subsidies));
-				bw_stops.newLine();
+				//MM: csv for development only
+//				bw_stops.write(String.valueOf(stop.getId())+","+String.valueOf(stop.getCoord().getX())+","+String.valueOf(stop.getCoord().getY())+","+String.valueOf(activities) + "," + String.valueOf(nbActivitiesAroundStop.get(stop).get(0)) + "," + String.valueOf((0.1 * nbActivitiesAroundStop.get(stop).get(1)))+","+String.valueOf(subsidies));
+//				bw_stops.newLine();
 				if(subsidies > 0.0)	{
 					counter++;
 					actBasedSub.put(stop.getId(), subsidies);
