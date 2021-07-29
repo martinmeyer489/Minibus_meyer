@@ -41,8 +41,16 @@ public final class PScoreContainer {
 	private boolean isFirstTour = true;
 	
 	private int servedTrips = 0;
+	private int numberOfSubsidizedTrips = 0;
 	private double costs = 0;
 	private double earnings = 0;
+
+
+	private double totalMeterDriven = 0.0;
+	private double totalTimeDriven = 0.0;
+	private double passengerKilometer = 0.0;
+
+	private double amountOfSubsidies;
 	
 	public PScoreContainer(Id<Vehicle> vehicleId, TicketMachineI ticketMachine) {
 		this.vehicleId = vehicleId;
@@ -52,6 +60,11 @@ public final class PScoreContainer {
 	public void handleStageContainer(StageContainer stageContainer) {
 		this.servedTrips++;
 		this.earnings += this.ticketMachine.getFare(stageContainer);
+
+		this.amountOfSubsidies += this.ticketMachine.getAmountOfSubsidies(stageContainer);
+		if(this.ticketMachine.isSubsidized(stageContainer))
+			this.numberOfSubsidizedTrips++;
+		this.passengerKilometer += this.ticketMachine.getPassengerDistanceKilometer(stageContainer);
 	}
 
 	public void handleOperatorCostContainer(OperatorCostContainer operatorCostContainer) {
@@ -59,6 +72,8 @@ public final class PScoreContainer {
 			this.costs += operatorCostContainer.getFixedCostPerDay();
 			this.isFirstTour = false;
 		}
+		this.totalMeterDriven  += operatorCostContainer.getTotalMeterDriven();
+		this.totalTimeDriven += operatorCostContainer.getTotalTimeDriven();
 		this.costs += operatorCostContainer.getRunningCostDistance();
 		this.costs += operatorCostContainer.getRunningCostTime();
 	}
@@ -77,6 +92,28 @@ public final class PScoreContainer {
 	
 	public int getTripsServed(){
 		return this.servedTrips;
+	}
+
+
+
+	public double getTotalMeterDriven()	{
+		return this.totalMeterDriven;
+	}
+
+	public double getTotalTimeDriven()	{
+		return this.totalTimeDriven;
+	}
+
+	public int getNumberOfSubsidizedTrips()	{
+		return this.numberOfSubsidizedTrips;
+	}
+
+	public double getAmountOfSubsidies()	{
+		return this.amountOfSubsidies;
+	}
+
+	public double getTotalPassengerKilometer()	{
+		return this.passengerKilometer;
 	}
 	
 	@Override

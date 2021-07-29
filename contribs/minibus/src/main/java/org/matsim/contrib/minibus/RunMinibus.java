@@ -90,8 +90,8 @@ public final class RunMinibus {
 //		Config config = ConfigUtils.loadConfig("/Users/MeyerMa/IdeaProjects/minibus_meyer/Input/config.xml", new PConfigGroup() ) ;
 		config.network().setInputFile("/Users/MeyerMa/IdeaProjects/data-science-matsim/jobs-infra/docker-build/input/minibus/berlin-v5.5.3-1pct.output_network.xml.gz");
 		config.global().setCoordinateSystem("EPSG:31468");
-		config.global().setRandomSeed(8);
-		config.plans().setInputFile("/Users/MeyerMa/IdeaProjects/data-science-matsim/jobs-infra/docker-build/input/minibus/berlin-v5.4-1pct.plans_activity_inside_prep.xml");
+		config.global().setRandomSeed(2);
+		config.plans().setInputFile("/Users/MeyerMa/Desktop/MA/scenarios/berlin/input/v5.4/v5.4_1pct/berlin-v5.4-1pct.plans_activity_inside_prep_test.xml.gz");
 		config.plans().setRemovingUnneccessaryPlanAttributes(true);
 		config.transit().setTransitScheduleFile("/Users/MeyerMa/IdeaProjects/data-science-matsim/jobs-infra/docker-build/input/minibus/berlin-v5.5.3-1pct.output_transitSchedule_no_bus_in_spandau.xml.gz");
 		config.transit().setVehiclesFile("/Users/MeyerMa/IdeaProjects/data-science-matsim/jobs-infra/docker-build/input/minibus/berlin-v5.5.3-1pct.output_transitVehicles.xml.gz");
@@ -99,10 +99,10 @@ public final class RunMinibus {
 //		config.facilities().setInputFile();
 
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory("/Users/MeyerMa/Desktop/MA/scenarios/berlin/output/subsidy/original_manser_alpha_600_beta_5");
+		config.controler().setOutputDirectory("/Users/MeyerMa/Desktop/MA/scenarios/berlin/output/subsidy/subsidy_50_20_test");
 		config.plans().setHandlingOfPlansWithoutRoutingMode(useMainModeIdentifier);
 		Scenario scenario = ScenarioUtils.loadScenario(config);
-		config.controler().setRunId("subsidy_600_5");
+		config.controler().setRunId("subsidy_50_20_act_500m");
 		config.controler().setLastIteration(400);
 
 

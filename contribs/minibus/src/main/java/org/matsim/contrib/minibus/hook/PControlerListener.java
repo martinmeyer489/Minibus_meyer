@@ -76,7 +76,11 @@ final class PControlerListener implements IterationStartsListener, StartupListen
 	@Override
 	public void notifyStartup(StartupEvent event) {
 		PBox pBox = (PBox) operators ;
-		pBox.notifyStartup(event);
+		try {
+			pBox.notifyStartup(event);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		addPTransitScheduleToOriginalOne(event.getServices().getScenario().getTransitSchedule(), pBox.getpTransitSchedule());
 		addPVehiclesToOriginalOnes(event.getServices().getScenario().getTransitVehicles(), this.pVehiclesFactory.createVehicles(pBox.getpTransitSchedule()));
 		event.getServices().getEvents().processEvent(new TransitScheduleChangedEvent(0.0));

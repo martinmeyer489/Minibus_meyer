@@ -54,10 +54,19 @@ public final class PPlan implements Comparable<PPlan>{
 	private double startTime;
 	private double endTime;
 	private int nVehicles;
+
+	private double totalHoursDrivenPerVehicle;
+	private double totalKilometersDrivenPerVehicle;
+	private double totalPassengerKilometerPerVehicle;
+	private double totalPassengerKilometer;
 	
 	private ArrayList<TransitStopFacility> stopsToBeServed;
 
 	private Set<Id<Vehicle>> vehicleIds;
+
+	private int subsidizedTrips;
+
+	private double amountOfSubsidies;
 
 	
 	public PPlan(Id<PPlan> planId, String creator, Id<PPlan> parentId) {
@@ -187,6 +196,56 @@ public final class PPlan implements Comparable<PPlan>{
 	public void setTripsServed(int tripsServed) {
 		this.tripsServed = tripsServed;
 	}
+
+	public int getSubsidizedTrips() {
+		return this.subsidizedTrips;
+	}
+
+	public void setNumberOfSubsidizedTrips(int totalNumberOfSubsTrips) {
+		this.subsidizedTrips = totalNumberOfSubsTrips;
+	}
+
+	public double getTotalAmountOfSubsidies() {
+		return this.amountOfSubsidies;
+	}
+
+	public void setTotalAmountOfSubsidies(double totalAmountOfSubsidies) {
+		this.amountOfSubsidies = totalAmountOfSubsidies;
+	}
+
+	public double getTotalHoursDrivenPerVehicle()	{
+		return this.totalHoursDrivenPerVehicle;
+	}
+
+	public void setTotalHoursDrivenPerVehicle(double totalHoursDrivenPerVehicle)	{
+		this.totalHoursDrivenPerVehicle = totalHoursDrivenPerVehicle;
+	}
+
+	public double getTotalKilometersDrivenPerVehicle()	{
+		return this.totalKilometersDrivenPerVehicle;
+	}
+
+	public void setTotalKilometersDrivenPerVehicle(double totalKilometersDrivenPerVehicle)	{
+		this.totalKilometersDrivenPerVehicle = totalKilometersDrivenPerVehicle;
+	}
+
+
+	public double getPassengerKilometerPerVehicle()	{
+		return this.totalPassengerKilometerPerVehicle;
+	}
+
+	public void setPassengerKilometerPerVehicle(double totalPassengerKilometerPerVehicle)	{
+		this.totalPassengerKilometerPerVehicle = totalPassengerKilometerPerVehicle;
+	}
+
+	public double getTotalPassengerKilometer()	{
+		return this.totalPassengerKilometer;
+	}
+
+	public void setTotalPassengerKilometer(double totalPassengerKilometer)	{
+		this.totalPassengerKilometer = totalPassengerKilometer;
+	}
+
 
 	public boolean isSameButVehSize(PPlan testPlan) {
 		

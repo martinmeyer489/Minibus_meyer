@@ -51,6 +51,11 @@ public final class LogElement {
 	private Id<PPlan> planId;
 	private String creatorId;
 	private Id<PPlan> parentId;
+	private double distanceDriven;
+	private double timeDriven;
+	private double passengerKilometer;
+	private int subsidizedTrips;
+	private double totalAmountOfSubsidies;
 	private int nVeh;
 	private int nPax;
 	private double score;
@@ -100,6 +105,30 @@ public final class LogElement {
 	}
 	public void setParentId(Id<PPlan> parentId) {
 		this.parentId = parentId;
+	}
+	public double getDistanceDriven() {
+		return this.distanceDriven;
+	}
+	public void setDistanceDriven(double distanceDriven) {
+		this.distanceDriven = distanceDriven;
+	}
+	public double getTimeDriven() {
+		return this.timeDriven;
+	}
+	public void setTimeDriven(double timeDriven) {
+		this.timeDriven = timeDriven;
+	}
+	public double getPassengerKilometer() {
+		return this.passengerKilometer;
+	}
+	public void setPassengerKilometer(double passengerKilometer) {
+		this.passengerKilometer = passengerKilometer;
+	}
+	public void setSubsidizedTrips(int subsidizedTrips2) {
+		this.subsidizedTrips = subsidizedTrips2;
+	}
+	public void setAmountOfSubsidies(double amountOfSubsidies) {
+		this.totalAmountOfSubsidies = amountOfSubsidies;
 	}
 	public int getnVeh() {
 		return nVeh;
@@ -160,7 +189,12 @@ public final class LogElement {
 		strB.append(DELIMITER).append("creator");
 		strB.append(DELIMITER).append("parent");
 		strB.append(DELIMITER).append("vehicle");
+		strB.append(DELIMITER).append("distance driven");
+		strB.append(DELIMITER).append("time driven");
+		strB.append(DELIMITER).append("passenger kilometer");
 		strB.append(DELIMITER).append("pax");
+		strB.append(DELIMITER).append("subidized pax");
+		strB.append(DELIMITER).append("tot subsidies");
 		strB.append(DELIMITER).append("score");
 		strB.append(DELIMITER).append("budget");
 		strB.append(DELIMITER).append("start time");
@@ -179,7 +213,12 @@ public final class LogElement {
 		strB.append(DELIMITER).append(this.creatorId);
 		strB.append(DELIMITER).append(this.parentId);
 		strB.append(DELIMITER).append(this.nVeh);
+		strB.append(DELIMITER).append(this.distanceDriven);
+		strB.append(DELIMITER).append(this.timeDriven);
+		strB.append(DELIMITER).append(this.passengerKilometer);
 		strB.append(DELIMITER).append(this.nPax);
+		strB.append(DELIMITER).append(this.subsidizedTrips);
+		strB.append(DELIMITER).append(this.totalAmountOfSubsidies);
 		strB.append(DELIMITER).append(this.score);
 		strB.append(DELIMITER).append(this.budget);
 		strB.append(DELIMITER).append(Time.writeTime(this.startTime));

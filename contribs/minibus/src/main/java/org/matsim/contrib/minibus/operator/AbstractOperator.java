@@ -281,16 +281,32 @@ abstract class AbstractOperator implements Operator{
 	private final void scorePlan(Map<Id<Vehicle>, PScoreContainer> driverId2ScoreMap, PPlan plan, RouteDesignScoringManager routeDesignScoringManager) {
 		double totalLineScore = 0.0;
 		int totalTripsServed = 0;
+		int totalSubsidizedTrips = 0;
+		double totalAmountOfSubsidies = 0;
+		double totalMeterDriven = 0.0;
+		double totalTimeDriven = 0.0;
+		double totalPassengerKilometer = 0.0;
 
 		for (Id<Vehicle> vehId : plan.getVehicleIds()) {
 			totalLineScore += driverId2ScoreMap.get(vehId).getTotalRevenue();
 			totalTripsServed += driverId2ScoreMap.get(vehId).getTripsServed();
+			totalMeterDriven += driverId2ScoreMap.get(vehId).getTotalMeterDriven();
+			totalTimeDriven += driverId2ScoreMap.get(vehId).getTotalTimeDriven();
+			totalPassengerKilometer += driverId2ScoreMap.get(vehId).getTotalPassengerKilometer();
+			totalSubsidizedTrips += driverId2ScoreMap.get(vehId).getNumberOfSubsidizedTrips();
+			totalAmountOfSubsidies += driverId2ScoreMap.get(vehId).getAmountOfSubsidies();
 		}
 
 		totalLineScore = capAndAddRouteDesignScore (plan, totalLineScore, routeDesignScoringManager);
 
 		plan.setScore(totalLineScore);
 		plan.setTripsServed(totalTripsServed);
+		plan.setTotalKilometersDrivenPerVehicle(totalMeterDriven / (1000 * plan.getNVehicles()));
+		plan.setTotalHoursDrivenPerVehicle(totalTimeDriven / (3600 * plan.getNVehicles()));
+		plan.setPassengerKilometerPerVehicle(totalPassengerKilometer / plan.getNVehicles());
+		plan.setTotalPassengerKilometer(totalPassengerKilometer);
+		plan.setNumberOfSubsidizedTrips(totalSubsidizedTrips);
+		plan.setTotalAmountOfSubsidies(totalAmountOfSubsidies);
 	}
 	
 	private double capAndAddRouteDesignScore (PPlan plan, double originaltotalLineScore, RouteDesignScoringManager routeDesignScoringManager) {

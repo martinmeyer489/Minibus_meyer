@@ -19,6 +19,10 @@
 
 package org.matsim.contrib.minibus.hook;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 //import javax.inject.Inject;
@@ -102,7 +106,7 @@ public final class PBox implements POperators {
 		this.franchise = new PFranchise(this.pConfig.getUseFranchise(), pConfig.getGridSize());	
 	}
 
-	void notifyStartup(StartupEvent event) {
+	void notifyStartup(StartupEvent event) throws IOException {
 		// This is the first iteration
 
 		TimeProvider timeProvider = new TimeProvider(this.pConfig, event.getServices().getControlerIO().getOutputPath());
@@ -162,6 +166,7 @@ public final class PBox implements POperators {
 				for (PlanElement pE : person.getSelectedPlan().getPlanElements()) {
 					if (pE instanceof Activity) {
 						Activity act = (Activity) pE;
+						//filter some activities out
 						if (!act.getType().equals("pt interaction") && !act.getType().equals("outside")) {
 							nbActivities.putIfAbsent(act.getCoord(), 0);
 							nbActivities.put(act.getCoord(), nbActivities.get(act.getCoord()) + 1);
@@ -184,21 +189,31 @@ public final class PBox implements POperators {
 				}
 			}
 
+
+			File stops = new File("/Users/MeyerMa/Desktop/MA/scenarios/berlin/output/subsidy/activites.csv");
+			FileWriter fw_stops = new FileWriter(stops);
+			BufferedWriter bw_stops = new BufferedWriter(fw_stops);
+
+
+			bw_stops.write("stopID,stop coord x,stop coord y,activity total,activity 500,activity 3000,subsidy");
+			bw_stops.newLine();
+
 			int counter = 0;
-//			double activitiessum=0;
-//			int counter1 = 0;
+
 			for(TransitStopFacility stop: nbActivitiesAroundStop.keySet())	{
 				double activities = nbActivitiesAroundStop.get(stop).get(0)+ (0.1 * nbActivitiesAroundStop.get(stop).get(1));
-//				activitiessum=activitiessum+activities;
-//				counter1++;
-				double subsidies = 150 - ( 20 * Math.pow(2, (activities * 0.0021) ) );
+				double subsidies = 300 - ( 50 * Math.pow(2, (activities * 0.0021) ) );
+
+				bw_stops.write(String.valueOf(stop.getId())+","+String.valueOf(stop.getCoord().getX())+","+String.valueOf(stop.getCoord().getY())+","+String.valueOf(activities) + "," + String.valueOf(nbActivitiesAroundStop.get(stop).get(0)) + "," + String.valueOf((0.1 * nbActivitiesAroundStop.get(stop).get(1)))+","+String.valueOf(subsidies));
+				bw_stops.newLine();
 				if(subsidies > 0.0)	{
 					counter++;
 					actBasedSub.put(stop.getId(), subsidies);
 				}
 			}
-//			log.info("###########################mean activtites"+activitiessum/counter1);
-//			log.info("number of subsidized stops: " + counter);
+
+
+			log.info("number of subsidized stops: " + counter);
 		}
 
 		this.ticketMachine.setActBasedSubs(actBasedSub);
