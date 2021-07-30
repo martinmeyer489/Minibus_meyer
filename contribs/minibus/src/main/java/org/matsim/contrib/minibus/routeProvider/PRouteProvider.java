@@ -40,4 +40,6 @@ public interface PRouteProvider {
 
 	public TransitLine createEmptyLineFromOperator(Id<Operator> id);
 
+	public String getRandomPVehicle();
+
 }

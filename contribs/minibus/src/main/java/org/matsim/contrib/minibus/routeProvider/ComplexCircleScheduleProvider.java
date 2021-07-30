@@ -216,6 +216,11 @@ final class ComplexCircleScheduleProvider implements PRouteProvider {
 	}
 
 	@Override
+	public String getRandomPVehicle() {
+		return null;
+	}
+
+	@Override
 	public Collection<TransitStopFacility> getAllPStops() {
 		return this.scheduleWithStopsOnly.getFacilities().values();
 	}

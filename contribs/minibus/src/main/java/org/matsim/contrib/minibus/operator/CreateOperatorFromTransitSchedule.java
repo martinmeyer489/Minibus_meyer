@@ -67,7 +67,7 @@ public final class CreateOperatorFromTransitSchedule implements PStrategy {
 		this.operatorFactory = operatorFactory;
 		this.routeProvider = routeProvider;
 		this.pConfig = pConfig;
-		
+
 		this.originalStops = new LinkedHashMap<>();
 		for (TransitStopFacility stop : originalSchedule.getFacilities().values()) {
 			this.originalStops.put(stop.getId().toString(), stop);
@@ -76,7 +76,7 @@ public final class CreateOperatorFromTransitSchedule implements PStrategy {
 
 	public LinkedList<Operator> run() {
 		LinkedList<Operator> operatorsToReturn = new LinkedList<>();
-		
+
 		if (pConfig.getTransitScheduleToStartWith() != null) {
 			TransitSchedule tS = readTransitSchedule(pConfig.getTransitScheduleToStartWith());
 
@@ -84,18 +84,27 @@ public final class CreateOperatorFromTransitSchedule implements PStrategy {
 				Operator operator = this.operatorFactory.createNewOperator(Id.create(this.pConfig.getPIdentifier() + lineEntry.getKey(), Operator.class));
 
 				PPlan plan = createPlan(lineEntry.getValue());
-				this.operatorId2PlanMap.put(operator.getId(), plan);			
+				this.operatorId2PlanMap.put(operator.getId(), plan);
 
-				double initialBudget = this.pConfig.getInitialBudget() % pConfig.getPricePerVehicleBought();			
+				double pricePerVehicle = 0;
+				for (PConfigGroup.PVehicleSettings pVS : pConfig.getPVehicleSettings()) {
+					if (plan.getPVehicleType().equals(pVS.getPVehicleName())) {
+						pricePerVehicle = pVS.getCostPerVehicleBought();
+					}
+				}
+
+				double initialBudget = this.pConfig.getInitialBudget() % pricePerVehicle;
 				operator.init(this.routeProvider, this, 0, initialBudget);
 				operatorsToReturn.add(operator);
 			}
 		}
-		
+
 		this.operatorId2PlanMap = null;
 		log.info("Returning " + operatorsToReturn.size() + " operators created from transit schedule file " + pConfig.getTransitScheduleToStartWith());
 		return operatorsToReturn;
 	}
+
+
 
 	private PPlan createPlan(TransitLine line) {
 		Id<PPlan> id = Id.create(0, PPlan.class);

@@ -30,11 +30,13 @@ import org.matsim.api.core.v01.events.handler.PersonLeavesVehicleEventHandler;
 import org.matsim.api.core.v01.events.handler.TransitDriverStartsEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleAbortsEventHandler;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.minibus.PConfigGroup;
 import org.matsim.core.controler.events.AfterMobsimEvent;
 import org.matsim.core.controler.listener.AfterMobsimListener;
 import org.matsim.core.utils.misc.Time;
 import org.matsim.vehicles.Vehicle;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -52,19 +54,19 @@ public final class OperatorCostCollectorHandler implements TransitDriverStartsEv
 	
 	private Network network;
 	private final String pIdentifier;
-	private final double costPerVehicleAndDay;
-	private final double expensesPerMeter;
-	private final double expensesPerSecond;
+//	private final double costPerVehicleAndDay;
+//	private final double expensesPerMeter;
+//	private final double expensesPerSecond;
 	
 	private final List<OperatorCostContainerHandler> operatorCostContainerHandlerList = new LinkedList<>();
 	private HashMap<Id<Vehicle>, OperatorCostContainer> vehId2OperatorCostContainer = new HashMap<>();
-	
-	public OperatorCostCollectorHandler(String pIdentifier, double costPerVehicleAndDay, double expensesPerMeter, double expensesPerSecond){
+
+	// in the new code, the vehicle costs are depending on the vehicle type
+	private Collection<PConfigGroup.PVehicleSettings> pVehicleSettings;
+
+	public OperatorCostCollectorHandler(String pIdentifier, Collection<PConfigGroup.PVehicleSettings> pVehicleSettings){
 		this.pIdentifier = pIdentifier;
-		this.costPerVehicleAndDay = costPerVehicleAndDay;
-		this.expensesPerMeter = expensesPerMeter;
-		this.expensesPerSecond = expensesPerSecond;
-		log.info("enabled");
+		this.pVehicleSettings = pVehicleSettings;
 	}
 	
 	public void init(Network network){
@@ -83,10 +85,22 @@ public final class OperatorCostCollectorHandler implements TransitDriverStartsEv
 			operatorCostContainerHandler.reset();
 		}
 	}
-	
+
 	@Override
 	public void handleEvent(TransitDriverStartsEvent event) {
-		this.vehId2OperatorCostContainer.put(event.getVehicleId(), new OperatorCostContainer(this.costPerVehicleAndDay, this.expensesPerMeter, this.expensesPerSecond));
+		double costPerVehicleAndDay = 0.0;
+		double expensesPerMeter = 0.0;
+		double expensesPerSecond = 0.0;
+
+		for (PConfigGroup.PVehicleSettings pVS : this.pVehicleSettings) {
+			if (event.getVehicleId().toString().contains(pVS.getPVehicleName())) {
+				costPerVehicleAndDay = pVS.getCostPerVehicleAndDay();
+				expensesPerMeter = pVS.getCostPerKilometer() / 1000.0;
+				expensesPerSecond = pVS.getCostPerHour() / 3600.0;
+			}
+		}
+
+		this.vehId2OperatorCostContainer.put(event.getVehicleId(), new OperatorCostContainer(costPerVehicleAndDay, expensesPerMeter, expensesPerSecond));
 		this.vehId2OperatorCostContainer.get(event.getVehicleId()).handleTransitDriverStarts(event);
 	}
 

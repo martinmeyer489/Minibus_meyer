@@ -95,7 +95,7 @@ public final class PBox implements POperators {
 		this.ticketMachine = ticketMachine ;
 		this.scorePlansHandler = new PScorePlansHandler(this.ticketMachine);
 		this.stageCollectorHandler = new StageContainerCreator(this.pConfig.getPIdentifier());
-		this.operatorCostCollectorHandler = new OperatorCostCollectorHandler(this.pConfig.getPIdentifier(), this.pConfig.getCostPerVehicleAndDay(), this.pConfig.getCostPerKilometer() / 1000.0, this.pConfig.getCostPerHour() / 3600.0);
+		this.operatorCostCollectorHandler = new OperatorCostCollectorHandler(this.pConfig.getPIdentifier(), this.pConfig.getPVehicleSettings());
 		this.franchise = new PFranchise(this.pConfig.getUseFranchise(), pConfig.getGridSize());	
 	}
 
@@ -188,7 +188,7 @@ public final class PBox implements POperators {
 
 		Map<Id<Vehicle>, PScoreContainer> driverId2ScoreMap = this.scorePlansHandler.getDriverId2ScoreMap();
 		for (Operator operator : this.operators) {
-			operator.score(driverId2ScoreMap, subsidy, routeDesignScoreManager);
+			operator.score(driverId2ScoreMap);
 		}
 
 		// why is the following done twice (see notifyIterationstarts)?

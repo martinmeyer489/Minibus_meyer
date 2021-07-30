@@ -23,6 +23,8 @@ import javax.inject.Inject;
 
 import org.matsim.contrib.minibus.PConfigGroup;
 
+import java.util.Collection;
+
 /**
  * Calculates the fare for a given {@link StageContainer}.
  * 
@@ -30,17 +32,43 @@ import org.matsim.contrib.minibus.PConfigGroup;
  *
  */
 public final class TicketMachineDefaultImpl implements TicketMachineI {
-	
-	private final double earningsPerBoardingPassenger;
-	private final double earningsPerMeterAndPassenger;
+
+	private final Collection<PConfigGroup.PVehicleSettings> pVehicleSettings;
+
 
 	@Inject public TicketMachineDefaultImpl(PConfigGroup pConfig ) {
-		this.earningsPerBoardingPassenger = pConfig.getEarningsPerBoardingPassenger() ;
-		this.earningsPerMeterAndPassenger = pConfig.getEarningsPerKilometerAndPassenger()/1000. ;
+		this.pVehicleSettings = pConfig.getPVehicleSettings();
 	}
-	
+
 	@Override
 	public double getFare(StageContainer stageContainer) {
-		return this.earningsPerBoardingPassenger + this.earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter();
+
+		double earningsPerBoardingPassenger = 0.0;
+		double earningsPerMeterAndPassenger = 0.0;
+
+		for (PConfigGroup.PVehicleSettings pVS : this.pVehicleSettings) {
+			if (stageContainer.getVehicleId().toString().contains(pVS.getPVehicleName())) {
+				earningsPerBoardingPassenger = pVS.getEarningsPerBoardingPassenger();
+				earningsPerMeterAndPassenger = pVS.getEarningsPerKilometerAndPassenger() / 1000.;
+			}
+		}
+
+//		if (this.actBasedSubs.containsKey(stageContainer.getStopEntered()))	{
+//			this.isSubsidized  = true;
+//			this.amountOfSubsidies = this.actBasedSubs.get(stageContainer.getStopEntered());
+//		}
+//		else	{
+//			this.amountOfSubsidies = 0;
+//			this.isSubsidized = false;
+//		}
+
+		return earningsPerBoardingPassenger + //this.amountOfSubsidies +
+				earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter();
+	}
+
+
+	@Override
+	public double getPassengerDistanceKilometer(StageContainer stageContainer) {
+		return stageContainer.getDistanceTravelledInMeter() / 1000;
 	}
 }
