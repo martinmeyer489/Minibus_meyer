@@ -19,23 +19,16 @@
 
 package org.matsim.contrib.minibus.operator;
 
-import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.contrib.minibus.PConfigGroup;
-import org.matsim.contrib.minibus.PConfigGroup.PVehicleSettings;
 import org.matsim.contrib.minibus.replanning.PStrategy;
 import org.matsim.contrib.minibus.replanning.PStrategyManager;
 import org.matsim.contrib.minibus.routeProvider.PRouteProvider;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.gbl.MatsimRandom;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-
-import javax.inject.Inject;
 
 /**
  * This operator has multiple plans. Each is weighted by the number of vehicles associated with.
@@ -43,26 +36,21 @@ import javax.inject.Inject;
  * In contrast to {@link MultiPlanOperator}, this operator accepts all plans as blueprints for replanning, again picking one is a weighted random draw.
  * Vehicle are shifted away from plans instantly, i.e. if a plan scored negative at least one vehicle is removed.
  * Vehicles are distributed to positive plans and new plans.
- *
+ * 
  * @author aneumann
  *
  */
 public final class CarefulMultiPlanOperator extends AbstractOperator{
-
+	
 	public static final String OPERATOR_NAME = "CarefulMultiPlanOperator";
 
-	private final static Logger log = Logger.getLogger(CarefulMultiPlanOperator.class);
-
-	private List<PPlan> plans;
-
-	private final PConfigGroup pConfig;
+    private List<PPlan> plans;
 
 	public CarefulMultiPlanOperator(Id<Operator> id, PConfigGroup pConfig, PFranchise franchise){
 		super(id, pConfig, franchise);
-		this.pConfig = pConfig;
 		this.plans = new LinkedList<>();
 	}
-
+	
 	public boolean init(PRouteProvider pRouteProvider, PStrategy initialStrategy, int iteration, double initialBudget) {
 		boolean initializedSuccessfully = super.init(pRouteProvider, initialStrategy, iteration, initialBudget);
 		if (initializedSuccessfully) {
@@ -74,52 +62,16 @@ public final class CarefulMultiPlanOperator extends AbstractOperator{
 		}
 		return initializedSuccessfully;
 	}
-
+	
 	@Override
 	public List<PPlan> getAllPlans(){
-		return this.plans;
+		return this.plans;		
 	}
-
+	
 	@Override
 	public PPlan getBestPlan() {
 		if (this.bestPlan == null) {
-
-			// not it is slightly different, because not the number of vehicles, but the vehicles have different capacities.
-			// Use the capacity as a weighting factor
-
-			double capacityPerVehicle = 0.0;
-			double totalCapacity = 0.0;
-
-			Map<Id<PPlan>, Double> weights = new LinkedHashMap<Id<PPlan>, Double>(this.plans.size());
-
-			for (PPlan plan : this.plans) {
-
-				capacityPerVehicle = 0.0;
-
-				for (PVehicleSettings pVS : this.pConfig.getPVehicleSettings()) {
-					if (plan.getPVehicleType().equals(pVS.getPVehicleName())) {
-						capacityPerVehicle = pVS.getCapacityPerVehicle();
-					}
-				}
-
-				double weight = capacityPerVehicle * plan.getNVehicles();
-				weights.put(plan.getId(), weight);
-
-				totalCapacity += capacityPerVehicle * plan.getNVehicles();
-
-			}
-
-			double accumulatedWeight = 0.0;
-			double rndTreshold = MatsimRandom.getRandom().nextDouble() * totalCapacity;
-			for (PPlan pPlan : this.plans) {
-				accumulatedWeight += weights.get(pPlan.getId());
-				if (rndTreshold <= accumulatedWeight) {
-					this.bestPlan = pPlan;
-					return this.bestPlan;
-				}
-			}
-
-			/*
+			
 			// will not return the best plan, but one random plan selected from all plans weighted by the number of vehicles of each plan
 			int numberOfVehicles = 0;
 			for (PPlan pPlan : this.plans) {
@@ -135,53 +87,42 @@ public final class CarefulMultiPlanOperator extends AbstractOperator{
 					return this.bestPlan;
 				}
 			}
-			*/
 		}
-
+		
 		return this.bestPlan;
 	}
 
 	public void replan(PStrategyManager pStrategyManager, int iteration) {
 		this.currentIteration = iteration;
-
-
+		
 		// First remove vehicles from all plans scored negative and add them to the reserve
 		this.numberOfVehiclesInReserve += this.removeVehiclesFromAllPlansWithNegativeScore(this.plans);
-
-
-		double costPerVehicleSell = 0;
-		for (PVehicleSettings pVS : this.pConfig.getPVehicleSettings()) {
-			if (getBestPlan().getPVehicleType().equals(pVS.getPVehicleName())) {
-				costPerVehicleSell = pVS.getCostPerVehicleSold();
-			}
-		}
-
+		
 		// Second, balance the budget
 		if(this.budget < 0){
 			// insufficient, try to balance from reserve vehicles
-			int numberOfVehiclesToSell = -1 * Math.min(-1, (int) Math.floor(this.budget / costPerVehicleSell));
-
+			int numberOfVehiclesToSell = -1 * Math.min(-1, (int) Math.floor(this.budget / this.costPerVehicleSell));
+			
 			while (this.numberOfVehiclesInReserve > 0 && numberOfVehiclesToSell > 0) {
 				// sell one vehicle from the reserve
 				this.numberOfVehiclesInReserve--;
 				numberOfVehiclesToSell--;
-				this.budget += costPerVehicleSell;
+				this.budget += this.costPerVehicleSell;
 			}
-
+			
 			while (numberOfVehiclesToSell > 0) {
 				this.findWorstPlanAndRemoveOneVehicle();
-				this.budget += costPerVehicleSell;
+				this.budget += this.costPerVehicleSell;
 				numberOfVehiclesToSell--;
 			}
 		}
 
 		// Third, buy vehicles
 		buyAsManyVehiclesAsPossible();
-
+		
 		// Fourth, increase the number of vehicles by one for all positive plans
-		// If the number of positive routes is high, the operators will probably first strengthen their existing routes before introducing new routes.
 		addVehiclesToPlansWithAPositiveScore();
-
+		
 		// Fifth, add new plans for all vehicles in reserve, but half the number of vehicles already in service as max
 		int maxVehiclesToDistribute = 0;
 		for (PPlan plan : this.plans) {
@@ -189,98 +130,63 @@ public final class CarefulMultiPlanOperator extends AbstractOperator{
 		}
 		maxVehiclesToDistribute = Math.max(1, maxVehiclesToDistribute / 2);
 
-		int tryouts = 10;
-		int remainingNumberOfTryouts = tryouts;
-
+        int tryouts = 10;
+        int remainingNumberOfTryouts = tryouts;
+		
 		while (this.numberOfVehiclesInReserve > 0 && maxVehiclesToDistribute > 0 && remainingNumberOfTryouts > 0) {
-
+			
 			remainingNumberOfTryouts--;
-
-			// find a random plan (not really a random plan, but a random plan weighted by the capacity)
-			// if a plan does not have any vehicle, it cannot be the best plan.
+			
+			// find a random plan
 			this.getBestPlan();
-
+			
 			PStrategy strategy = pStrategyManager.chooseStrategy();
-
 			if (strategy != null) {
 				PPlan newPlan = strategy.run(this);
 				if (newPlan != null) {
-					if(this.getFranchise().planRejected(newPlan) ){
+					if(this.getFranchise().planRejected(newPlan)){
 						// plan is rejected by franchise system
 						newPlan = null;
-					}
-
-					if (newPlan != null && newPlan.getNVehicles() > 0) {
+					}	
+					
+					if (newPlan != null) {
 						// get one vehicle from the reserve
-						if (this.getBestPlan().getPVehicleType().equals(newPlan.getPVehicleType()))	{
-							this.numberOfVehiclesInReserve--;
-							maxVehiclesToDistribute--;
-						}
+						this.numberOfVehiclesInReserve--;
+						maxVehiclesToDistribute--;
 						this.plans.add(newPlan);
 					}
 				}
-
+				
 				this.bestPlan = null;
 			}
 		}
-
+		
 		removeAllPlansWithZeroVehicles();
-
+		
 		// Fifth, reinitialize all plans
 		for (PPlan plan : this.plans) {
 			plan.setLine(this.routeProvider.createTransitLineFromOperatorPlan(this.id, plan));
 		}
-
+		
 		this.updateCurrentTransitLine();
 	}
 
 	private void addVehiclesToPlansWithAPositiveScore() {
 		List<PPlan> plansWithAPositiveScore = new LinkedList<>();
-
-		int k = 0;
-
 		for (PPlan plan : this.plans) {
 			if (plan.getScore() > 0) {
 				// positive
 				plansWithAPositiveScore.add(plan);
-
-				// the probability to not innovate depends on the number of positive routes
-				k++;
 			}
 		}
+		
 		Collections.sort(plansWithAPositiveScore);
-
-		double probabilityToNotInnovate = 1 / ( 1 + 30 * Math.exp(-k / 0.7));
-
-		// debugger if the operator has no positive plans
-		if (k == 0)
-			probabilityToNotInnovate = -1;
-
-		double rndTreshold = MatsimRandom.getRandom().nextDouble();
-
-		// now do this for-loop again, if the number of routes is high
-		if(probabilityToNotInnovate > rndTreshold)	{
-			// put all the vehicles in reserve on existing positively scored plans
-			while(this.numberOfVehiclesInReserve > 0 && plansWithAPositiveScore.size() > 0)	{
-				//log.info("we are in this section");
-				for (PPlan plan : plansWithAPositiveScore) {
-					if (this.numberOfVehiclesInReserve > 0) {
-						// increase by one vehicle
-						plan.setNVehicles(plan.getNVehicles() + 1);
-						this.numberOfVehiclesInReserve--;
-					}
-				}
-			}
-		}
-
-		else	{
-			// do increase the positive plans by 1 vehicle
-			for (PPlan plan : plansWithAPositiveScore) {
-				if (this.numberOfVehiclesInReserve > 0) {
-					// increase by one vehicle
-					plan.setNVehicles(plan.getNVehicles() + 1);
-					this.numberOfVehiclesInReserve--;
-				}
+		
+		for (PPlan plan : plansWithAPositiveScore) {
+			if (this.numberOfVehiclesInReserve > 0) {
+				// increase by one vehicle
+				plan.setNVehicles(plan.getNVehicles() + 1);
+				this.numberOfVehiclesInReserve--;
 			}
 		}
 	}
@@ -311,44 +217,32 @@ public final class CarefulMultiPlanOperator extends AbstractOperator{
 	}
 
 	private void buyAsManyVehiclesAsPossible() {
-		double costPerVehicleBuy = 0;
-		for (PVehicleSettings pVS : this.pConfig.getPVehicleSettings()) {
-			if (this.bestPlan.getPVehicleType().equals(pVS.getPVehicleName())) {
-				costPerVehicleBuy = pVS.getCostPerVehicleBought();
-			}
-		}
-		while (this.getBudget() > costPerVehicleBuy) {
-			this.setBudget(this.getBudget() - costPerVehicleBuy);
+		while (this.getBudget() > this.getCostPerVehicleBuy()) {
+			// budget ok, buy one
+			this.setBudget(this.getBudget() - this.getCostPerVehicleBuy());
 			this.numberOfVehiclesInReserve++;
 		}
 	}
-
+	
 	/**
-	 *
+	 * 
 	 * @param plansToCheck
 	 * @return The number of vehicles removed
 	 */
 	private int removeVehiclesFromAllPlansWithNegativeScore(List<PPlan> plansToCheck) {
 		int numberOfRemovedVehicles = 0;
-
+		
 		for (PPlan pPlan : plansToCheck) {
 			if (pPlan.getScore() < 0.0) {
 				// okay plan scored negative - tackle it
 				double score = Math.abs(pPlan.getScore());
 				// remove as many vehicles as necessary to compensate the impact on the budget plus one to hopefully get that plan positively scored in the next iteration
-
-				double costPerVehicleSell = 0;
-				for (PVehicleSettings pVS : this.pConfig.getPVehicleSettings()) {
-					if (pPlan.getPVehicleType().equals(pVS.getPVehicleName())) {
-						costPerVehicleSell = pVS.getCostPerVehicleSold();
-					}
-				}
-				int vehiclesToRemove = (int) (score / costPerVehicleSell) + 1;
+				int vehiclesToRemove = (int) (score / this.costPerVehicleSell) + 1;
 				if(pPlan.getNVehicles() < vehiclesToRemove) {
 					// this plan cannot compensate - remove all vehicles;
 					vehiclesToRemove = pPlan.getNVehicles();
 				}
-
+				
 				pPlan.setNVehicles(pPlan.getNVehicles() - vehiclesToRemove);
 				numberOfRemovedVehicles += vehiclesToRemove;
 			}
@@ -356,10 +250,10 @@ public final class CarefulMultiPlanOperator extends AbstractOperator{
 		return numberOfRemovedVehicles;
 	}
 
-
+		
 	/**
 	 * Find plan with the worst score per vehicle. Removes one vehicle. Removes the whole plan, if no vehicle is left.
-	 *
+	 * 
 	 * @return
 	 */
 	private void findWorstPlanAndRemoveOneVehicle(){
@@ -375,7 +269,7 @@ public final class CarefulMultiPlanOperator extends AbstractOperator{
 				}
 			}
 		}
-
+		
 		// remove one vehicle
 		worstPlan.setNVehicles(worstPlan.getNVehicles() - 1);
 		// remove plan, if not served anymore

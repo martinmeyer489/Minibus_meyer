@@ -28,20 +28,21 @@ import org.matsim.contrib.minibus.replanning.PStrategy;
 import org.matsim.contrib.minibus.replanning.PStrategyManager;
 import org.matsim.contrib.minibus.routeProvider.PRouteProvider;
 import org.matsim.contrib.minibus.scoring.PScoreContainer;
+import org.matsim.contrib.minibus.scoring.routeDesignScoring.RouteDesignScoringManager;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.vehicles.Vehicle;
 
 /**
- *
+ * 
  * @author aneumann
  *
  */
 public interface Operator {
-
+	
 	public boolean init(PRouteProvider pRouteProvider, PStrategy initialStrategy, int iteration, double initialBudget);
-
-	public void score(Map<Id<Vehicle>, PScoreContainer> driverId2ScoreMap);
-
+	
+	public void score(Map<Id<Vehicle>, PScoreContainer> driverId2ScoreMap, SubsidyI subsidy, RouteDesignScoringManager routeDesignScoringManager);
+	
 	public void replan(PStrategyManager pStrategyManager, int iteration);
 
 	public TransitLine getCurrentTransitLine();
@@ -49,7 +50,7 @@ public interface Operator {
 	public double getBudget();
 
 	public int getNumberOfVehiclesOwned();
-
+	
 	public List<PPlan> getAllPlans();
 
 	public int getCurrentIteration();
@@ -58,15 +59,14 @@ public interface Operator {
 
 	public PFranchise getFranchise();
 
-
 	public Id<Operator> getId();
-
+	
 	public Id<PPlan> getNewPlanId();
 
 	public PPlan getBestPlan();
-
+	
 	public double getMinOperationTime();
-
+	
 	public OperatorState getOperatorState();
 
 	public void setBudget(double budget);

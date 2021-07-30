@@ -195,12 +195,7 @@ final class SimpleCircleScheduleProvider implements PRouteProvider {
 	public TransitLine createEmptyLineFromOperator(Id<Operator> id) {
 		return this.scheduleWithStopsOnly.getFactory().createTransitLine(Id.create(id, TransitLine.class));
 	}
-
-	@Override
-	public String getRandomPVehicle() {
-		return null;
-	}
-
+	
 	@Override
 	public Collection<TransitStopFacility> getAllPStops() {
 		return this.scheduleWithStopsOnly.getFacilities().values();
