@@ -138,6 +138,7 @@ public final class RunMinibus {
 		if (subsidies) {
 			PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.class);
 			pConfig.setUseSubsidyApproach(true);
+			pConfig.setSubsidyApproach("perPassenger");
 		}
 
 

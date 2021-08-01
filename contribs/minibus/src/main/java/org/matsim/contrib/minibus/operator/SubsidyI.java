@@ -33,7 +33,7 @@ public interface SubsidyI {
 	// yy My intuition would be to pass objects rather than IDs. kai, mar'17
 	// yyyyyy If you look into how it is called, it passes an ad-hoc ID, relying on a convention.  We should try to avoid that.  kai, mar'17
 	
-	void computeSubsidy();
+	 void computeSubsidy();
 	// yy My intuition would be to try to do without this. kai, mar'17
 	
 }

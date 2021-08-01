@@ -30,19 +30,16 @@ import java.util.*;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.minibus.PConfigGroup;
 import org.matsim.contrib.minibus.PConstants.OperatorState;
 import org.matsim.contrib.minibus.fare.StageContainerCreator;
 import org.matsim.contrib.minibus.fare.TicketMachineI;
-import org.matsim.contrib.minibus.operator.Operator;
-import org.matsim.contrib.minibus.operator.OperatorInitializer;
-import org.matsim.contrib.minibus.operator.PFranchise;
-import org.matsim.contrib.minibus.operator.POperators;
-import org.matsim.contrib.minibus.operator.SubsidyI;
-import org.matsim.contrib.minibus.operator.TimeProvider;
+import org.matsim.contrib.minibus.operator.*;
 import org.matsim.contrib.minibus.replanning.PStrategyManager;
 import org.matsim.contrib.minibus.schedule.PStopsFactory;
 import org.matsim.contrib.minibus.scoring.OperatorCostCollectorHandler;
@@ -54,6 +51,7 @@ import org.matsim.core.controler.events.IterationStartsEvent;
 import org.matsim.core.controler.events.ScoringEvent;
 import org.matsim.core.controler.events.StartupEvent;
 import org.matsim.core.network.NetworkUtils;
+import org.matsim.pt.routes.TransitPassengerRoute;
 import org.matsim.pt.transitSchedule.TransitScheduleFactoryImpl;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.transitSchedule.api.TransitScheduleWriter;
@@ -91,6 +89,9 @@ public final class PBox implements POperators {
 	private final TicketMachineI ticketMachine;
 	
 	@Inject(optional=true) private SubsidyI subsidy;
+	HashMap<Id<TransitStopFacility>, Double> actBasedSub = new HashMap<>();
+
+
 	// yy my intuition would be to pass an empty subsidy rather than making it optional. 
 
 	/**
@@ -157,37 +158,81 @@ public final class PBox implements POperators {
 			this.pTransitSchedule.addTransitLine(operator.getCurrentTransitLine());
 		}
 
-// create subsidy distribution
-		HashMap<Id<TransitStopFacility>, Double> actBasedSub = new HashMap<>();
+
 		if(this.pConfig.getUseSubsidyApproach()) {
-			HashMap<Coord, Integer> nbActivities = new HashMap<>();
-			HashMap<TransitStopFacility, List<Integer>> nbActivitiesAroundStop = new HashMap<>();
-			for (Person person : event.getServices().getScenario().getPopulation().getPersons().values()) {
-				for (PlanElement pE : person.getSelectedPlan().getPlanElements()) {
-					if (pE instanceof Activity) {
-						Activity act = (Activity) pE;
-						//filter some activities out
-						if (!act.getType().equals("pt interaction") && !act.getType().equals("outside")) {
-							nbActivities.putIfAbsent(act.getCoord(), 0);
-							nbActivities.put(act.getCoord(), nbActivities.get(act.getCoord()) + 1);
+
+			if (this.pConfig.getSubsidyApproach().equals("perPassenger")){
+
+
+				double subsidies =1;
+
+				for (TransitStopFacility stop : this.pStopsOnly.getFacilities().values()) {
+					actBasedSub.put(stop.getId(), subsidies);
+				}
+
+
+
+
+
+//			for (Person person : event.getServices().getScenario().getPopulation().getPersons().values()){
+
+				// Get the PPlan which is used by this person.
+//				for (PlanElement pE : person.getSelectedPlan().getPlanElements()){
+//
+//					if (pE instanceof Leg) {
+//
+//						Leg leg = (Leg) pE;
+//
+//						if (leg.getMode().equals(TransportMode.pt)) {
+//
+//							TransitPassengerRoute route = (TransitPassengerRoute) leg.getRoute();
+//							String planIdString = route.getRouteId().toString();
+//							Id<PPlan> pId = Id.create(planIdString, PPlan.class);
+//
+//							if (this.pId2persons.get(pId) != null) {
+//								this.pId2persons.get(pId).add(person.getId());
+//							} else {
+//								Set<Id<Person>> persons = new HashSet<>();
+//								persons.add(person.getId());
+//								this.pId2persons.put(pId, persons);
+//							}
+//
+//						}
+//					}
+//				}
+
+
+//			}
+		} else {
+			// create subsidy distribution
+				HashMap<Coord, Integer> nbActivities = new HashMap<>();
+				HashMap<TransitStopFacility, List<Integer>> nbActivitiesAroundStop = new HashMap<>();
+				for (Person person : event.getServices().getScenario().getPopulation().getPersons().values()) {
+					for (PlanElement pE : person.getSelectedPlan().getPlanElements()) {
+						if (pE instanceof Activity) {
+							Activity act = (Activity) pE;
+							//filter some activities out
+							if (!act.getType().equals("pt interaction") && !act.getType().equals("outside")) {
+								nbActivities.putIfAbsent(act.getCoord(), 0);
+								nbActivities.put(act.getCoord(), nbActivities.get(act.getCoord()) + 1);
+							}
 						}
 					}
 				}
-			}
 
-			for (TransitStopFacility stop : this.pStopsOnly.getFacilities().values()) {
-				nbActivitiesAroundStop.putIfAbsent(stop, new ArrayList<>(Arrays.asList(0,0)));
-				for (Coord actCoord : nbActivities.keySet()) {
-					if(NetworkUtils.getEuclideanDistance(actCoord, stop.getCoord()) < 500)  {
-						int nbActs = nbActivities.get(actCoord);
-						nbActivitiesAroundStop.get(stop).set(0, nbActivitiesAroundStop.get(stop).get(0) + nbActs);
-					}
-					if(NetworkUtils.getEuclideanDistance(actCoord, stop.getCoord()) < 3000)  {
-						int nbActs = nbActivities.get(actCoord);
-						nbActivitiesAroundStop.get(stop).set(1, nbActivitiesAroundStop.get(stop).get(1) + nbActs);
+				for (TransitStopFacility stop : this.pStopsOnly.getFacilities().values()) {
+					nbActivitiesAroundStop.putIfAbsent(stop, new ArrayList<>(Arrays.asList(0,0)));
+					for (Coord actCoord : nbActivities.keySet()) {
+						if(NetworkUtils.getEuclideanDistance(actCoord, stop.getCoord()) < 500)  {
+							int nbActs = nbActivities.get(actCoord);
+							nbActivitiesAroundStop.get(stop).set(0, nbActivitiesAroundStop.get(stop).get(0) + nbActs);
+						}
+						if(NetworkUtils.getEuclideanDistance(actCoord, stop.getCoord()) < 3000)  {
+							int nbActs = nbActivities.get(actCoord);
+							nbActivitiesAroundStop.get(stop).set(1, nbActivitiesAroundStop.get(stop).get(1) + nbActs);
+						}
 					}
 				}
-			}
 
 
 //			File stops = new File("/Users/MeyerMa/Desktop/MA/scenarios/berlin/output/subsidy/activites.csv");
@@ -198,25 +243,28 @@ public final class PBox implements POperators {
 //			bw_stops.write("stopID,stop coord x,stop coord y,activity total,activity 500,activity 3000,subsidy");
 //			bw_stops.newLine();
 
-			int counter = 0;
+				int counter = 0;
 
-			for(TransitStopFacility stop: nbActivitiesAroundStop.keySet())	{
-				double activities = nbActivitiesAroundStop.get(stop).get(0)+ (0.1 * nbActivitiesAroundStop.get(stop).get(1));
-				double subsidies = 300 - ( 50 * Math.pow(2, (activities * 0.0021) ) );
-				//MM: csv for development only
+				for(TransitStopFacility stop: nbActivitiesAroundStop.keySet())	{
+					double activities = nbActivitiesAroundStop.get(stop).get(0)+ (0.1 * nbActivitiesAroundStop.get(stop).get(1));
+					double subsidies = 300 - ( 50 * Math.pow(2, (activities * 0.0021) ) );
+					//MM: csv for development only
 //				bw_stops.write(String.valueOf(stop.getId())+","+String.valueOf(stop.getCoord().getX())+","+String.valueOf(stop.getCoord().getY())+","+String.valueOf(activities) + "," + String.valueOf(nbActivitiesAroundStop.get(stop).get(0)) + "," + String.valueOf((0.1 * nbActivitiesAroundStop.get(stop).get(1)))+","+String.valueOf(subsidies));
 //				bw_stops.newLine();
-				if(subsidies > 0.0)	{
-					counter++;
-					actBasedSub.put(stop.getId(), subsidies);
+					if(subsidies > 0.0)	{
+						counter++;
+						actBasedSub.put(stop.getId(), subsidies);
+					}
 				}
+
+
+				log.info("number of subsidized stops: " + counter);
 			}
 
-
-			log.info("number of subsidized stops: " + counter);
+			this.ticketMachine.setActBasedSubs(actBasedSub);
 		}
 
-		this.ticketMachine.setActBasedSubs(actBasedSub);
+
 
 
 		// Reset the franchise system - TODO necessary?
