@@ -26,6 +26,7 @@ import org.matsim.contrib.minibus.fare.StageContainerCreator;
 import org.matsim.contrib.minibus.fare.TicketMachineI;
 import org.matsim.contrib.minibus.operator.TimeProvider;
 import org.matsim.core.gbl.MatsimRandom;
+import org.matsim.pt.transitSchedule.api.TransitSchedule;
 
 import java.util.ArrayList;
 
@@ -45,7 +46,7 @@ public final class PStrategyManager {
 	private double totalWeights = 0.0;
 	private boolean allStrategiesAreDisabled = false;
 
-	public void init(PConfigGroup pConfig, StageContainerCreator stageContainerCreator, TicketMachineI ticketMachine, TimeProvider timeProvider) {
+	public void init(PConfigGroup pConfig, StageContainerCreator stageContainerCreator, TicketMachineI ticketMachine, TimeProvider timeProvider,String outputdir, TransitSchedule pStopsOnly) {
 		for (PStrategySettings settings : pConfig.getStrategySettings()) {
 			String classname = settings.getModuleName();
 			double rate = settings.getProbability();
@@ -53,14 +54,17 @@ public final class PStrategyManager {
 				log.info("The following strategy has a weight set to zero. Will drop it. " + classname);
 				continue;
 			}
-			PStrategy strategy = loadStrategy(classname, settings, stageContainerCreator, ticketMachine, timeProvider);
+			PStrategy strategy = loadStrategy(classname, settings, stageContainerCreator, ticketMachine, timeProvider,pConfig,pStopsOnly,outputdir);
 			this.addStrategy(strategy, rate, settings.getDisableInIteration());
 		}
 		
 		log.info("enabled with " + this.strategies.size()  + " strategies");
 	}
 
-	private PStrategy loadStrategy(final String name, final PStrategySettings settings, StageContainerCreator stageContainerCreator, TicketMachineI ticketMachine, TimeProvider timeProvider) {
+//	private PStrategy loadStrategy(final String name, final PStrategySettings settings, StageContainerCreator stageContainerCreator, TicketMachineI ticketMachine, TimeProvider timeProvider) {
+//		PStrategy strategy = null;
+
+	private PStrategy loadStrategy(final String name, final PStrategySettings settings, StageContainerCreator stageContainerCreator, TicketMachineI ticketMachine, TimeProvider timeProvider, PConfigGroup pConfig, TransitSchedule pStopsOnly, String outputdir) {
 		PStrategy strategy = null;
 		
 		if (name.equals(MaxRandomStartTimeAllocator.STRATEGY_NAME)) {
@@ -69,9 +73,24 @@ public final class PStrategyManager {
 			strategy = new MaxRandomEndTimeAllocator(settings.getParametersAsArrayList());
 		} else if(name.equals(SidewaysRouteExtension.STRATEGY_NAME)){
 			strategy = new SidewaysRouteExtension(settings.getParametersAsArrayList());
-		} else if(name.equals(EndRouteExtension.STRATEGY_NAME)){
+		} else if(name.equals(SidewaysRouteExtensionBF.STRATEGY_NAME)){
+			strategy = new SidewaysRouteExtensionBF(settings.getParametersAsArrayList(), pConfig.getPNetwork(), pStopsOnly);
+		}
+
+
+
+		else if(name.equals(EndRouteExtension.STRATEGY_NAME)){
 			strategy = new EndRouteExtension(settings.getParametersAsArrayList());
-		} else if (name.equals(ReduceTimeServedRFare.STRATEGY_NAME)) {
+		} else if(name.equals(EndRouteExtensionBF.STRATEGY_NAME)){
+			strategy = new EndRouteExtensionBF(settings.getParametersAsArrayList(), pConfig.getPNetwork(), pStopsOnly);
+		}
+		else if(name.equals(ChooseVehicleType.STRATEGY_NAME)){
+			ChooseVehicleType strat = new ChooseVehicleType(settings.getParametersAsArrayList());
+			strat.setPConfig(pConfig);
+			strat.setOutputDir(outputdir);
+			strategy = strat;
+		}
+		else if (name.equals(ReduceTimeServedRFare.STRATEGY_NAME)) {
 			ReduceTimeServedRFare strat = new ReduceTimeServedRFare(settings.getParametersAsArrayList());
 			strat.setTicketMachine(ticketMachine);
 			stageContainerCreator.addStageContainerHandler(strat);
@@ -81,7 +100,16 @@ public final class PStrategyManager {
 			strat.setTicketMachine(ticketMachine);
 			stageContainerCreator.addStageContainerHandler(strat);
 			strategy = strat;
-		} else if (name.equals(WeightedStartTimeExtension.STRATEGY_NAME)) {
+		} else if (name.equals(ReduceStopsToBeServedRFareBF.STRATEGY_NAME)) {
+			ReduceStopsToBeServedRFareBF strat = new ReduceStopsToBeServedRFareBF(settings.getParametersAsArrayList());
+			strat.setTicketMachine(ticketMachine);
+			stageContainerCreator.addStageContainerHandler(strat);
+			strategy = strat;
+		}
+
+
+
+		else if (name.equals(WeightedStartTimeExtension.STRATEGY_NAME)) {
 			WeightedStartTimeExtension strat = new WeightedStartTimeExtension(settings.getParametersAsArrayList());
 			strat.setTimeProvider(timeProvider);
 			strategy = strat;

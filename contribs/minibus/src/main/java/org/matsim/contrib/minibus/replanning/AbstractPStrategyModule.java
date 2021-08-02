@@ -49,7 +49,7 @@ abstract class AbstractPStrategyModule implements PStrategy {
 
 	}
 
-	final Set<Id<TransitStopFacility>> getStopsUsed(Collection<TransitRoute> routes) {
+	Set<Id<TransitStopFacility>> getStopsUsed(Collection<TransitRoute> routes) {
 		Set<Id<TransitStopFacility>> stopsUsed = new TreeSet<>();
 		for (TransitRoute route : routes) {
 			for (TransitRouteStop stop : route.getStops()) {
@@ -87,7 +87,7 @@ abstract class AbstractPStrategyModule implements PStrategy {
 		return geometries;
 	}
 
-	final Geometry createBuffer(List<Geometry> lineStrings, double bufferSize, boolean excludeTermini) {
+	Geometry createBuffer(List<Geometry> lineStrings, double bufferSize, boolean excludeTermini) {
 		BufferParameters bufferParameters = new BufferParameters();
 
 		if (excludeTermini) {

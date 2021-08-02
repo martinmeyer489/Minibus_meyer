@@ -26,9 +26,7 @@ import org.matsim.contrib.minibus.replanning.PStrategyManager;
 import org.matsim.contrib.minibus.routeProvider.PRouteProvider;
 import org.matsim.core.gbl.MatsimRandom;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * This operator has multiple plans. Each is weighted by the number of vehicles associated with.
@@ -45,9 +43,11 @@ public final class CarefulMultiPlanOperator extends AbstractOperator{
 	public static final String OPERATOR_NAME = "CarefulMultiPlanOperator";
 
     private List<PPlan> plans;
+	private final PConfigGroup pConfig;
 
 	public CarefulMultiPlanOperator(Id<Operator> id, PConfigGroup pConfig, PFranchise franchise){
 		super(id, pConfig, franchise);
+		this.pConfig = pConfig;
 		this.plans = new LinkedList<>();
 	}
 	
@@ -67,17 +67,52 @@ public final class CarefulMultiPlanOperator extends AbstractOperator{
 	public List<PPlan> getAllPlans(){
 		return this.plans;		
 	}
-	
+
 	@Override
 	public PPlan getBestPlan() {
 		if (this.bestPlan == null) {
-			
+
+			// not it is slightly different, because not the number of vehicles, but the vehicles have different capacities.
+			// Use the capacity as a weighting factor
+
+			double capacityPerVehicle = 0.0;
+			double totalCapacity = 0.0;
+
+			Map<Id<PPlan>, Double> weights = new LinkedHashMap<Id<PPlan>, Double>(this.plans.size());
+
+			for (PPlan plan : this.plans) {
+
+				capacityPerVehicle = 0.0;
+
+				for (PConfigGroup.PVehicleSettings pVS : this.pConfig.getPVehicleSettings()) {
+					if (plan.getPVehicleType().equals(pVS.getPVehicleName())) {
+						capacityPerVehicle = pVS.getCapacityPerVehicle();
+					}
+				}
+
+				double weight = capacityPerVehicle * plan.getNVehicles();
+				weights.put(plan.getId(), weight);
+
+				totalCapacity += capacityPerVehicle * plan.getNVehicles();
+
+			}
+
+			double accumulatedWeight = 0.0;
+			double rndTreshold = MatsimRandom.getRandom().nextDouble() * totalCapacity;
+			for (PPlan pPlan : this.plans) {
+				accumulatedWeight += weights.get(pPlan.getId());
+				if (rndTreshold <= accumulatedWeight) {
+					this.bestPlan = pPlan;
+					return this.bestPlan;
+				}
+			}
+
+			/*
 			// will not return the best plan, but one random plan selected from all plans weighted by the number of vehicles of each plan
 			int numberOfVehicles = 0;
 			for (PPlan pPlan : this.plans) {
 				numberOfVehicles += pPlan.getNVehicles();
 			}
-
 			double accumulatedWeight = 0.0;
 			double rndTreshold = MatsimRandom.getRandom().nextDouble() * numberOfVehicles;
 			for (PPlan pPlan : this.plans) {
@@ -87,32 +122,70 @@ public final class CarefulMultiPlanOperator extends AbstractOperator{
 					return this.bestPlan;
 				}
 			}
+			*/
 		}
-		
+
 		return this.bestPlan;
 	}
+
+
+
+
+//	@Override
+//	public PPlan getBestPlan() {
+//		if (this.bestPlan == null) {
+//
+//			// will not return the best plan, but one random plan selected from all plans weighted by the number of vehicles of each plan
+//			int numberOfVehicles = 0;
+//			for (PPlan pPlan : this.plans) {
+//				numberOfVehicles += pPlan.getNVehicles();
+//			}
+//
+//			double accumulatedWeight = 0.0;
+//			double rndTreshold = MatsimRandom.getRandom().nextDouble() * numberOfVehicles;
+//			for (PPlan pPlan : this.plans) {
+//				accumulatedWeight += pPlan.getNVehicles();
+//				if (rndTreshold <= accumulatedWeight) {
+//					this.bestPlan = pPlan;
+//					return this.bestPlan;
+//				}
+//			}
+//		}
+//
+//		return this.bestPlan;
+//	}
 
 	public void replan(PStrategyManager pStrategyManager, int iteration) {
 		this.currentIteration = iteration;
 		
 		// First remove vehicles from all plans scored negative and add them to the reserve
 		this.numberOfVehiclesInReserve += this.removeVehiclesFromAllPlansWithNegativeScore(this.plans);
-		
+
+		double costPerVehicleSell = 0;
+		for (PConfigGroup.PVehicleSettings pVS : this.pConfig.getPVehicleSettings()) {
+			if (getBestPlan().getPVehicleType().equals(pVS.getPVehicleName())) {
+				costPerVehicleSell = pVS.getCostPerVehicleSold();
+			}
+		}
+
+
+
+
 		// Second, balance the budget
 		if(this.budget < 0){
 			// insufficient, try to balance from reserve vehicles
-			int numberOfVehiclesToSell = -1 * Math.min(-1, (int) Math.floor(this.budget / this.costPerVehicleSell));
+			int numberOfVehiclesToSell = -1 * Math.min(-1, (int) Math.floor(this.budget / costPerVehicleSell));
 			
 			while (this.numberOfVehiclesInReserve > 0 && numberOfVehiclesToSell > 0) {
 				// sell one vehicle from the reserve
 				this.numberOfVehiclesInReserve--;
 				numberOfVehiclesToSell--;
-				this.budget += this.costPerVehicleSell;
+				this.budget += costPerVehicleSell;
 			}
 			
 			while (numberOfVehiclesToSell > 0) {
 				this.findWorstPlanAndRemoveOneVehicle();
-				this.budget += this.costPerVehicleSell;
+				this.budget += costPerVehicleSell;
 				numberOfVehiclesToSell--;
 			}
 		}
@@ -217,9 +290,17 @@ public final class CarefulMultiPlanOperator extends AbstractOperator{
 	}
 
 	private void buyAsManyVehiclesAsPossible() {
-		while (this.getBudget() > this.getCostPerVehicleBuy()) {
+
+
+		double costPerVehicleBuy = 0;
+		for (PConfigGroup.PVehicleSettings pVS : this.pConfig.getPVehicleSettings()) {
+			if (this.bestPlan.getPVehicleType().equals(pVS.getPVehicleName())) {
+				costPerVehicleBuy = pVS.getCostPerVehicleBought();
+			}
+		}
+		while (this.getBudget() > costPerVehicleBuy) {
 			// budget ok, buy one
-			this.setBudget(this.getBudget() - this.getCostPerVehicleBuy());
+			this.setBudget(this.getBudget() - costPerVehicleBuy);
 			this.numberOfVehiclesInReserve++;
 		}
 	}
@@ -236,8 +317,16 @@ public final class CarefulMultiPlanOperator extends AbstractOperator{
 			if (pPlan.getScore() < 0.0) {
 				// okay plan scored negative - tackle it
 				double score = Math.abs(pPlan.getScore());
+
+
+				double costPerVehicleSell = 0;
+				for (PConfigGroup.PVehicleSettings pVS : this.pConfig.getPVehicleSettings()) {
+					if (pPlan.getPVehicleType().equals(pVS.getPVehicleName())) {
+						costPerVehicleSell = pVS.getCostPerVehicleSold();
+					}
+				}
 				// remove as many vehicles as necessary to compensate the impact on the budget plus one to hopefully get that plan positively scored in the next iteration
-				int vehiclesToRemove = (int) (score / this.costPerVehicleSell) + 1;
+				int vehiclesToRemove = (int) (score / costPerVehicleSell) + 1;
 				if(pPlan.getNVehicles() < vehiclesToRemove) {
 					// this plan cannot compensate - remove all vehicles;
 					vehiclesToRemove = pPlan.getNVehicles();

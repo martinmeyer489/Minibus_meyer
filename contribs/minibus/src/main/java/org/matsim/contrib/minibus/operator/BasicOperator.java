@@ -33,10 +33,13 @@ import org.matsim.contrib.minibus.replanning.PStrategyManager;
  */
 public final class BasicOperator extends AbstractOperator{
 	
-	public static final String OPERATOR_NAME = "BasicOperator"; 
+	public static final String OPERATOR_NAME = "BasicOperator";
+	private final PConfigGroup pConfig;
 
 	public BasicOperator(Id<Operator> id, PConfigGroup pConfig, PFranchise franchise){
+
 		super(id, pConfig, franchise);
+		this.pConfig = pConfig;
 	}
 
 	@Override
@@ -55,11 +58,23 @@ public final class BasicOperator extends AbstractOperator{
 			}
 			this.testPlan = null;
 		}
-		
+		double costPerVehicleSell = 0;
+		double costPerVehicleBought = 0;
+		for (PConfigGroup.PVehicleSettings pVS : this.pConfig.getPVehicleSettings()) {
+			if (this.bestPlan.getPVehicleType().equals(pVS.getPVehicleName())) {
+				costPerVehicleBought = pVS.getCostPerVehicleBought();
+				costPerVehicleSell = pVS.getCostPerVehicleSold();
+			}
+		}
+
+
+
+
+
 		// balance the budget
 		if(this.budget < 0){
 			// insufficient, sell vehicles
-			int numberOfVehiclesToSell = -1 * Math.min(-1, (int) Math.floor(this.budget / this.costPerVehicleSell));
+			int numberOfVehiclesToSell = -1 * Math.min(-1, (int) Math.floor(this.budget / costPerVehicleSell));
 			
 			if(this.bestPlan.getNVehicles() - numberOfVehiclesToSell < 1){
 				// can not balance the budget by selling vehicles, bankrupt
@@ -70,7 +85,7 @@ public final class BasicOperator extends AbstractOperator{
 
 			// can balance the budget, so sell vehicles
 			this.bestPlan.setNVehicles(this.bestPlan.getNVehicles() - numberOfVehiclesToSell);
-			this.budget += this.costPerVehicleSell * numberOfVehiclesToSell;
+			this.budget += costPerVehicleSell * numberOfVehiclesToSell;
 //			log.info("Sold " + numberOfVehiclesToSell + " vehicle from line " + this.id + " - new budget is " + this.budget);
 		}
 
@@ -78,9 +93,9 @@ public final class BasicOperator extends AbstractOperator{
 		// First buy vehicles
 		int vehicleBought = 0;
 		
-		while (this.getBudget() > this.getCostPerVehicleBuy()) {
+		while (this.getBudget() > costPerVehicleBought) {
 			// budget ok, buy one
-			this.setBudget(this.getBudget() - this.getCostPerVehicleBuy());
+			this.setBudget(this.getBudget() - costPerVehicleBought);
 			vehicleBought++;
 		}					
 		

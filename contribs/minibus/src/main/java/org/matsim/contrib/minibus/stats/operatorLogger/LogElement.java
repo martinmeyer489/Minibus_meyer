@@ -51,6 +51,8 @@ public final class LogElement {
 	private Id<PPlan> planId;
 	private String creatorId;
 	private Id<PPlan> parentId;
+	private String vehicleType;
+	private double headway;
 	private double distanceDriven;
 	private double timeDriven;
 	private double passengerKilometer;
@@ -106,6 +108,21 @@ public final class LogElement {
 	public void setParentId(Id<PPlan> parentId) {
 		this.parentId = parentId;
 	}
+	public String getVehicleType() {
+		return vehicleType;
+	}
+	public void setVehicleType(String vehicleType) {
+		this.vehicleType = vehicleType;
+	}
+	public double getHeadway() {
+		return this.headway;
+	}
+	public void setHeadway(double headway) {
+		this.headway = headway;
+	}
+
+
+
 	public double getDistanceDriven() {
 		return this.distanceDriven;
 	}
@@ -188,6 +205,8 @@ public final class LogElement {
 		strB.append(DELIMITER).append("plan id");
 		strB.append(DELIMITER).append("creator");
 		strB.append(DELIMITER).append("parent");
+		strB.append(DELIMITER).append("vehicletype");
+		strB.append(DELIMITER).append("headway");
 		strB.append(DELIMITER).append("vehicle");
 		strB.append(DELIMITER).append("distance driven");
 		strB.append(DELIMITER).append("time driven");
@@ -212,6 +231,8 @@ public final class LogElement {
 		strB.append(DELIMITER).append(this.planId);
 		strB.append(DELIMITER).append(this.creatorId);
 		strB.append(DELIMITER).append(this.parentId);
+		strB.append(DELIMITER).append(this.vehicleType);
+		strB.append(DELIMITER).append(this.headway);
 		strB.append(DELIMITER).append(this.nVeh);
 		strB.append(DELIMITER).append(this.distanceDriven);
 		strB.append(DELIMITER).append(this.timeDriven);
@@ -236,7 +257,12 @@ public final class LogElement {
 		strB.append(DELIMITER).append(NOVALUE);
 		strB.append(DELIMITER).append(NOVALUE);
 		strB.append(DELIMITER).append(NOVALUE);
+		strB.append(DELIMITER).append(NOVALUE);
+		strB.append(DELIMITER).append(NOVALUE);
 		strB.append(DELIMITER).append(nVeh);
+		strB.append(DELIMITER).append(NOVALUE);
+		strB.append(DELIMITER).append(NOVALUE);
+		strB.append(DELIMITER).append(NOVALUE);
 		strB.append(DELIMITER).append(nPax);
 		strB.append(DELIMITER).append(score);
 		strB.append(DELIMITER).append(budget);

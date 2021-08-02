@@ -84,9 +84,17 @@ public final class CreateOperatorFromTransitSchedule implements PStrategy {
 				Operator operator = this.operatorFactory.createNewOperator(Id.create(this.pConfig.getPIdentifier() + lineEntry.getKey(), Operator.class));
 
 				PPlan plan = createPlan(lineEntry.getValue());
-				this.operatorId2PlanMap.put(operator.getId(), plan);			
+				this.operatorId2PlanMap.put(operator.getId(), plan);
 
-				double initialBudget = this.pConfig.getInitialBudget() % pConfig.getPricePerVehicleBought();			
+
+				double pricePerVehicle = 0;
+				for (PConfigGroup.PVehicleSettings pVS : pConfig.getPVehicleSettings()) {
+					if (plan.getPVehicleType().equals(pVS.getPVehicleName())) {
+						pricePerVehicle = pVS.getCostPerVehicleBought();
+					}
+				}
+
+				double initialBudget = this.pConfig.getInitialBudget() % pricePerVehicle;
 				operator.init(this.routeProvider, this, 0, initialBudget);
 				operatorsToReturn.add(operator);
 			}

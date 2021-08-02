@@ -19,6 +19,7 @@
 
 package org.matsim.contrib.minibus.operator;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -53,9 +54,9 @@ abstract class AbstractOperator implements Operator{
 	private int numberOfPlansTried;
 	
 	private final PFranchise franchise;
-	private final double costPerVehicleBuy;
-	final double costPerVehicleSell;
-	private final double costPerVehicleAndDay;
+//	private final double costPerVehicleBuy;
+//	final double costPerVehicleSell;
+//	private final double costPerVehicleAndDay;
 	private final double minOperationTime;
 	private final boolean mergeTransitLine;
 	
@@ -74,15 +75,18 @@ abstract class AbstractOperator implements Operator{
 	
 	PRouteProvider routeProvider;
 	int currentIteration;
-	
+
+	private Collection<PConfigGroup.PVehicleSettings> pVehicleSettings;
+
 	private final LogRouteDesignVsTotalScore logRouteDesignVsTotalScore;
 
 	AbstractOperator(Id<Operator> id, PConfigGroup pConfig, PFranchise franchise){
 		this.id = id;
 		this.numberOfIterationsForProspecting = pConfig.getNumberOfIterationsForProspecting();
-		this.costPerVehicleBuy = pConfig.getPricePerVehicleBought();
-		this.costPerVehicleSell = pConfig.getPricePerVehicleSold();
-		this.costPerVehicleAndDay = pConfig.getCostPerVehicleAndDay();
+		this.pVehicleSettings = pConfig.getPVehicleSettings();
+//		this.costPerVehicleBuy = pConfig.getPricePerVehicleBought();
+//		this.costPerVehicleSell = pConfig.getPricePerVehicleSold();
+//		this.costPerVehicleAndDay = pConfig.getCostPerVehicleAndDay();
 		this.minOperationTime = pConfig.getMinOperationTime();
 		this.mergeTransitLine = pConfig.getMergeTransitLine();
 		this.logRouteDesignVsTotalScore = pConfig.getLogLogRouteDesignVsTotalScore();
@@ -115,39 +119,74 @@ abstract class AbstractOperator implements Operator{
 			RouteDesignScoringManager routeDesignScoringManager) {
 		this.setScoreLastIteration(this.getScore());
 		this.setScore(0);
+		int seats = 0;
+		String pVehicleType = null;
 		
 		// score all plans
 		for (PPlan plan : this.getAllPlans()) {
 			scorePlan(pScores, plan, routeDesignScoringManager);
 			
-			if (subsidy != null) {
-				Id<PPlan> pplanId = Id.create(plan.getLine().getId().toString() + "-" + plan.getId().toString(), PPlan.class);
-				double subsidyAmount = subsidy.getSubsidy(pplanId);
-				double newPlanScore = subsidyAmount + plan.getScore();
-				plan.setScore(newPlanScore);
-			}
+//			if (subsidy != null) {
+//				Id<PPlan> pplanId = Id.create(plan.getLine().getId().toString() + "-" + plan.getId().toString(), PPlan.class);
+//				double subsidyAmount = subsidy.getSubsidy(pplanId);
+//				double newPlanScore = subsidyAmount + plan.getScore();
+//				plan.setScore(newPlanScore);
+//			}
 			
 			this.setScore(this.getScore() + plan.getScore());
 
 			for (TransitRoute route : plan.getLine().getRoutes().values()) {
 				route.setDescription(plan.toString(this.budget + this.getScore()));
 			}
+
+			int capacity = 0;
+			for (PConfigGroup.PVehicleSettings pVS : this.pVehicleSettings) {
+				if (plan.getPVehicleType().equals(pVS.getPVehicleName())) {
+					capacity = pVS.getCapacityPerVehicle();
+				}
+			}
+			if(plan.getNVehicles() * capacity >= seats)	{
+				pVehicleType = plan.getPVehicleType();
+				seats = plan.getNVehicles() * capacity;
+			}
 		}
 		
-		processScore();
+		processScore(pVehicleType);
 	}
 	
-	void processScore() {
+	void processScore(String pVehicleType) {
+
 		// score all vehicles not associated with plans
-		setScore(getScore() - this.numberOfVehiclesInReserve * this.costPerVehicleAndDay);
-		
-		if (this.getScore() > 0.0) {
+		double costPerVehicleDay = 0;
+		double costPerVehicleSell = 0;
+		String vehicleType = null;
+
+		// I think this happens if the operator has no more plan
+		if (getBestPlan() == null)
+			vehicleType = pVehicleType;
+		else
+			vehicleType = getBestPlan().getPVehicleType();
+
+		if (vehicleType == null)
+			vehicleType = "Gelenkbus";
+
+
+		for (PConfigGroup.PVehicleSettings pVS : this.pVehicleSettings) {
+			if (vehicleType.equals(pVS.getPVehicleName())) {
+				costPerVehicleDay = pVS.getCostPerVehicleAndDay();
+				costPerVehicleSell = pVS.getCostPerVehicleSold();
+			}
+		}
+
+		score -= this.numberOfVehiclesInReserve * costPerVehicleDay;
+
+		if (this.score > 0.0) {
 			this.operatorState = OperatorState.INBUSINESS;
 		}
-		
+
 		if (this.operatorState.equals(OperatorState.PROSPECTING)) {
 			if(this.numberOfIterationsForProspecting == 0){
-				if (this.getScore() < 0.0) {
+				if (this.score < 0.0) {
 					// no iterations for prospecting left and score still negative - terminate
 					this.operatorState = OperatorState.BANKRUPT;
 				}
@@ -155,15 +194,16 @@ abstract class AbstractOperator implements Operator{
 			this.numberOfIterationsForProspecting--;
 		}
 
-		this.budget += this.getScore();
-		
+		this.budget += this.score;
+
 		// check, if bankrupt
 		if(this.budget < 0){
 			// insufficient, sell vehicles
-			int numberOfVehiclesToSell = -1 * Math.min(-1, (int) Math.floor(this.budget / this.costPerVehicleSell));
-			
+
+			int numberOfVehiclesToSell = -1 * Math.min(-1, (int) Math.floor(this.budget / costPerVehicleSell));
+
 			int numberOfVehiclesOwned = this.getNumberOfVehiclesOwned();
-			
+
 			if(numberOfVehiclesOwned - numberOfVehiclesToSell < 1){
 				// can not balance the budget by selling vehicles, bankrupt
 				this.operatorState = OperatorState.BANKRUPT;
@@ -251,13 +291,13 @@ abstract class AbstractOperator implements Operator{
 		return this.routeProvider;
 	}
 
-	double getCostPerVehicleBuy() {
-		return costPerVehicleBuy;
-	}
-
-	public double getCostPerVehicleSell() {
-		return costPerVehicleSell;
-	}
+//	double getCostPerVehicleBuy() {
+//		return costPerVehicleBuy;
+//	}
+//
+//	public double getCostPerVehicleSell() {
+//		return costPerVehicleSell;
+//	}
 
 	@Override
 	public OperatorState getOperatorState() {
@@ -324,8 +364,12 @@ abstract class AbstractOperator implements Operator{
 				 * minScoreToSurvive CarefulMultiPlanOperator would leave at least one vehicle
 				 * on the plan, so plan could survive
 				 */
+
+
+				//Meyer:
+				//TODO replace 500 with the cost per vehicle sell depending on vehicle type
 				
-				double minScoreToSurvive = -costPerVehicleSell * plan.getNVehicles();
+				double minScoreToSurvive = -500 * plan.getNVehicles();
 				if (originaltotalLineScore >= minScoreToSurvive) {
 					/*
 					 * Limit negative score to the amount at which the plan is eliminated. Multiply
@@ -333,7 +377,7 @@ abstract class AbstractOperator implements Operator{
 					 * has an influence on busy lines.
 					 */
 					totalLineScore = Math.max(originaltotalLineScore + routeDesignScore * plan.getNVehicles(),
-							minScoreToSurvive - 0.0001 * costPerVehicleSell);
+							minScoreToSurvive - 0.0001 * 500);
 				} else {
 					// plan already has a bad score that will cause its elimination, don't cap this
 					// monetary cost

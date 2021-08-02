@@ -54,7 +54,7 @@ public final class PPlan implements Comparable<PPlan>{
 	private double startTime;
 	private double endTime;
 	private int nVehicles;
-
+	private String pVehicleType;
 	private double totalHoursDrivenPerVehicle;
 	private double totalKilometersDrivenPerVehicle;
 	private double totalPassengerKilometerPerVehicle;
@@ -67,6 +67,7 @@ public final class PPlan implements Comparable<PPlan>{
 	private int subsidizedTrips;
 
 	private double amountOfSubsidies;
+	private double headway;
 
 	
 	public PPlan(Id<PPlan> planId, String creator, Id<PPlan> parentId) {
@@ -157,7 +158,23 @@ public final class PPlan implements Comparable<PPlan>{
 		this.nVehicles = nVehicles;
 	}
 
-	public ArrayList<TransitStopFacility> getStopsToBeServed() {
+	public double getHeadway(){
+		return this.headway;
+	}
+
+	public void setHeadway(double headway){
+		this.headway = headway;
+	}
+
+	public String getPVehicleType()	{
+		return this.pVehicleType;
+	}
+
+	public void setPVehicleType(String pVehicleType)	{
+		this.pVehicleType = pVehicleType;
+	}
+
+		public ArrayList<TransitStopFacility> getStopsToBeServed() {
 		return stopsToBeServed;
 	}
 	

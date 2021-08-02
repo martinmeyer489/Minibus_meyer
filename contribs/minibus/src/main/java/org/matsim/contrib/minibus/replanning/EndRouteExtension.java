@@ -111,8 +111,11 @@ public final class EndRouteExtension extends AbstractPStrategyModule {
 		newPlan.setNVehicles(1);
 		newPlan.setStartTime(oldPlan.getStartTime());
 		newPlan.setEndTime(oldPlan.getEndTime());
+		newPlan.setPVehicleType(oldPlan.getPVehicleType());
 		newPlan.setStopsToBeServed(newStopsToBeServed);
-		
+		newPlan.setHeadway(oldPlan.getHeadway());
+
+
 		newPlan.setLine(operator.getRouteProvider().createTransitLineFromOperatorPlan(operator.getId(), newPlan));
 		
 		return newPlan;

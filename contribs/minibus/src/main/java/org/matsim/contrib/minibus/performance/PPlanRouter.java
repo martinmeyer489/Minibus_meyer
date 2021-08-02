@@ -1,54 +1,34 @@
-/* *********************************************************************** *
- * project: org.matsim.*
- * PlanRouter.java
- *                                                                         *
- * *********************************************************************** *
- *                                                                         *
- * copyright       : (C) 2012 by the members listed in the COPYING,        *
- *                   LICENSE and WARRANTY file.                            *
- * email           : info at matsim dot org                                *
- *                                                                         *
- * *********************************************************************** *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *   See also COPYING, LICENSE and WARRANTY file                           *
- *                                                                         *
- * *********************************************************************** */
 package org.matsim.contrib.minibus.performance;
 
-import java.util.List;
-
-import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.PlanElement;
+import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.population.*;
+import org.matsim.core.config.Config;
 import org.matsim.core.population.algorithms.PersonAlgorithm;
 import org.matsim.core.population.algorithms.PlanAlgorithm;
+import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.router.TripStructureUtils.Trip;
-import org.matsim.core.utils.misc.OptionalTime;
 import org.matsim.facilities.ActivityFacilities;
 import org.matsim.facilities.FacilitiesUtils;
-import org.matsim.facilities.Facility;
+import org.matsim.pt.transitSchedule.api.TransitRoute;
+import org.matsim.vehicles.Vehicle;
+
+import java.util.List;
 
 /**
  * {@link PlanAlgorithm} responsible for routing all trips of a plan.
  * Activity times are not updated, even if the previous trip arrival time
  * is after the activity end time.
- * <br>
- * <b>Duplicated code: Just one change that affects the run method. See comment there.</b>
  *
- * @author aneumann, thibautd
+ * @author thibautd
  */
-final class PPlanRouter implements PlanAlgorithm, PersonAlgorithm {
+public class PPlanRouter implements PlanAlgorithm, PersonAlgorithm {
 	private final TripRouter routingHandler;
 	private final ActivityFacilities facilities;
+
+	private final static Logger log = Logger.getLogger(PPlanRouter.class);
 
 	/**
 	 * Initialises an instance.
@@ -66,7 +46,6 @@ final class PPlanRouter implements PlanAlgorithm, PersonAlgorithm {
 
 	/**
 	 * Short for initialising without facilities.
-	 * @param routingHandler
 	 */
 	public PPlanRouter(
 			final TripRouter routingHandler) {
@@ -79,6 +58,7 @@ final class PPlanRouter implements PlanAlgorithm, PersonAlgorithm {
 	 *
 	 * @return the internal TripRouter instance.
 	 */
+	@Deprecated // get TripRouter out of injection instead. kai, feb'16
 	public TripRouter getTripRouter() {
 		return routingHandler;
 	}
@@ -87,27 +67,71 @@ final class PPlanRouter implements PlanAlgorithm, PersonAlgorithm {
 	public void run(final Plan plan) {
 		final List<Trip> trips = TripStructureUtils.getTrips( plan );
 
-		for (Trip trip : trips) {
-			
-			
-			/** That's the only check that got added.... **/
-			if (TripStructureUtils.identifyMainMode(trip.getTripElements()).equals(TransportMode.pt)) {
+		for (Trip oldTrip : trips) {
+			boolean hasParaLeg = hasParaLeg(oldTrip);
+			final String routingMode = TripStructureUtils.identifyMainMode( oldTrip.getTripElements() );
+
+			if(hasParaLeg) {
 				final List<? extends PlanElement> newTrip =
 						routingHandler.calcRoute(
-								TripStructureUtils.identifyMainMode( trip.getTripElements() ),
-								toFacility( trip.getOriginActivity() ),
-								toFacility( trip.getDestinationActivity() ),
-								calcEndOfActivity( trip.getOriginActivity() , plan ),
+								routingMode,
+								FacilitiesUtils.toFacility( oldTrip.getOriginActivity(), facilities ),
+								FacilitiesUtils.toFacility( oldTrip.getDestinationActivity(), facilities ),
+								calcEndOfActivity( oldTrip.getOriginActivity() , plan, routingHandler.getConfig() ),
 								plan.getPerson() );
-
-					TripRouter.insertTrip(
-							plan, 
-							trip.getOriginActivity(),
-							newTrip,
-							trip.getDestinationActivity());
+				putVehicleFromOldTripIntoNewTripIfMeaningful(oldTrip, newTrip);
+				TripRouter.insertTrip(
+						plan,
+						oldTrip.getOriginActivity(),
+						newTrip,
+						oldTrip.getDestinationActivity());
 			}
-			
 		}
+	}
+
+	private static boolean hasParaLeg(Trip trip) {
+		for(Leg leg: trip.getLegsOnly())  {
+			if(leg.getRoute() instanceof TransitRoute)  {
+				TransitRoute route = (TransitRoute) leg.getRoute();
+				if(route.getId().toString().contains("para")) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * If the old trip had vehicles set in its network routes, and it used a single vehicle,
+	 * and if the new trip does not come with vehicles set in its network routes,
+	 * then put the vehicle of the old trip into the network routes of the new trip.
+	 * @param oldTrip The old trip
+	 * @param newTrip The new trip
+	 */
+	private static void putVehicleFromOldTripIntoNewTripIfMeaningful(Trip oldTrip, List<? extends PlanElement> newTrip) {
+		Id<Vehicle> oldVehicleId = getUniqueVehicleId(oldTrip);
+		if (oldVehicleId != null) {
+			for (Leg leg : TripStructureUtils.getLegs(newTrip)) {
+				if (leg.getRoute() instanceof NetworkRoute) {
+					if (((NetworkRoute) leg.getRoute()).getVehicleId() == null) {
+						((NetworkRoute) leg.getRoute()).setVehicleId(oldVehicleId);
+					}
+				}
+			}
+		}
+	}
+
+	private static Id<Vehicle> getUniqueVehicleId(Trip trip) {
+		Id<Vehicle> vehicleId = null;
+		for (Leg leg : trip.getLegsOnly()) {
+			if (leg.getRoute() instanceof NetworkRoute) {
+				if (vehicleId != null && (!vehicleId.equals(((NetworkRoute) leg.getRoute()).getVehicleId()))) {
+					return null; // The trip uses several vehicles.
+				}
+				vehicleId = ((NetworkRoute) leg.getRoute()).getVehicleId();
+			}
+		}
+		return vehicleId;
 	}
 
 	@Override
@@ -120,19 +144,14 @@ final class PPlanRouter implements PlanAlgorithm, PersonAlgorithm {
 	// /////////////////////////////////////////////////////////////////////////
 	// helpers
 	// /////////////////////////////////////////////////////////////////////////
-	private Facility toFacility(final Activity act) {
-		if ((act.getLinkId() == null || act.getCoord() == null)
-				&& facilities != null
-				&& !facilities.getFacilities().isEmpty()) {
-			// use facilities only if the activity does not provides the required fields.
-			return facilities.getFacilities().get( act.getFacilityId() );
-		}
-		return FacilitiesUtils.toFacility( act, facilities );
-	}
 
-	private static double calcEndOfActivity(
+	public static double calcEndOfActivity(
 			final Activity activity,
-			final Plan plan) {
+			final Plan plan,
+			final Config config ) {
+		// yyyy similar method in PopulationUtils.  TripRouter.calcEndOfPlanElement in fact uses it.  However, this seems doubly inefficient; calling the
+		// method in PopulationUtils directly would probably be faster.  kai, jul'19
+
 		if (activity.getEndTime().isDefined())
 			return activity.getEndTime().seconds();
 
@@ -144,37 +163,10 @@ final class PPlanRouter implements PlanAlgorithm, PersonAlgorithm {
 		double now = 0;
 
 		for (PlanElement pe : plan.getPlanElements()) {
-			now = updateNow( now , pe );
+			now = TripRouter.calcEndOfPlanElement(now, pe, config);
 			if (pe == activity) return now;
 		}
 
 		throw new RuntimeException( "activity "+activity+" not found in "+plan.getPlanElements() );
 	}
-
-	private static double updateNow(
-			final double now,
-			final PlanElement pe) {
-		if (pe instanceof Activity) {
-			Activity act = (Activity) pe;
-			OptionalTime startTime = act.getStartTime();
-			OptionalTime dur = act.getMaximumDuration();
-			if (act.getEndTime().isDefined()) {
-				// use fromAct.endTime as time for routing
-				return act.getEndTime().seconds();
-			}
-			else if (startTime.isDefined() && dur.isDefined()) {
-				// use fromAct.startTime + fromAct.duration as time for routing
-				return startTime.seconds() + dur.seconds();
-			}
-			else if (dur.isDefined()) {
-				// use last used time + fromAct.duration as time for routing
-				return now + dur.seconds();
-			}
-			else {
-				throw new RuntimeException("activity has neither end-time nor duration." + act);
-			}
-		}
-		return now + ((Leg)pe).getTravelTime().orElse(0);
-	}	
 }
-

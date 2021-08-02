@@ -103,8 +103,10 @@ public final class PBox implements POperators {
 		this.ticketMachine = ticketMachine ;
 		this.scorePlansHandler = new PScorePlansHandler(this.ticketMachine);
 		this.stageCollectorHandler = new StageContainerCreator(this.pConfig.getPIdentifier());
-		this.operatorCostCollectorHandler = new OperatorCostCollectorHandler(this.pConfig.getPIdentifier(), this.pConfig.getCostPerVehicleAndDay(), this.pConfig.getCostPerKilometer() / 1000.0, this.pConfig.getCostPerHour() / 3600.0);
-		this.franchise = new PFranchise(this.pConfig.getUseFranchise(), pConfig.getGridSize());	
+		//this.operatorCostCollectorHandler = new OperatorCostCollectorHandler(this.pConfig.getPIdentifier(), this.pConfig.getCostPerVehicleAndDay(), this.pConfig.getCostPerKilometer() / 1000.0, this.pConfig.getCostPerHour() / 3600.0);
+		this.operatorCostCollectorHandler = new OperatorCostCollectorHandler(this.pConfig.getPIdentifier(), this.pConfig.getPVehicleSettings());
+
+		this.franchise = new PFranchise(this.pConfig.getUseFranchise(), pConfig.getGridSize());
 	}
 
 	void notifyStartup(StartupEvent event) throws IOException {
@@ -114,7 +116,7 @@ public final class PBox implements POperators {
 		event.getServices().getEvents().addHandler(timeProvider);
 
 		// initialize strategy manager
-		this.strategyManager.init(this.pConfig, this.stageCollectorHandler, this.ticketMachine, timeProvider);
+		this.strategyManager.init(this.pConfig, this.stageCollectorHandler, this.ticketMachine, timeProvider,event.getServices().getControlerIO().getOutputPath(), this.pStopsOnly);
 		
 		// initialize route design scoring manager
 		this.routeDesignScoreManager.init(this.pConfig, event.getServices().getScenario().getNetwork());
