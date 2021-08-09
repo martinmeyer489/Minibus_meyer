@@ -49,7 +49,7 @@ public final class PRouteProviderFactory {
 		} else if(pConfig.getRouteProvider().equalsIgnoreCase(ComplexCircleScheduleProvider.NAME)){
 			return new ComplexCircleScheduleProvider(pStopsOnly, network, randomStopProvider, pConfig.getVehicleMaximumVelocity(), pConfig.getPlanningSpeedFactor(), pConfig.getDriverRestTime(), pConfig.getMode());
 		} else if(pConfig.getRouteProvider().equalsIgnoreCase(TimeAwareComplexCircleScheduleProvider.NAME)){
-			return new TimeAwareComplexCircleScheduleProvider(pStopsOnly, network, randomStopProvider,randomPVehicleProvider, pConfig.getVehicleMaximumVelocity(), pConfig.getPlanningSpeedFactor(), pConfig.getDriverRestTime(), pConfig.getPIdentifier(), eventsManager, pConfig.getMode());
+			return new TimeAwareComplexCircleScheduleProvider(pStopsOnly, network, randomStopProvider,randomPVehicleProvider, pConfig.getVehicleMaximumVelocity(), pConfig.getPlanningSpeedFactor(), pConfig.getDriverRestTime(), pConfig.getPIdentifier(), eventsManager, pConfig.getMode(),pConfig.getPVehicleSettings());
 		} else {
 			log.error("There is no route provider specified. " + pConfig.getRouteProvider() + " unknown");
 			return null;

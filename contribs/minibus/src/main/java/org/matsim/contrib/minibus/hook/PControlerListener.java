@@ -53,7 +53,7 @@ import org.matsim.vehicles.Vehicles;
 
 /**
  * Hook to register paratransit black box with MATSim
- * 
+ *
  * @author aneumann
  */
 final class PControlerListener implements IterationStartsListener, StartupListener, ScoringListener {
@@ -109,7 +109,7 @@ final class PControlerListener implements IterationStartsListener, StartupListen
 						return stuckFactory.getReRouteStuck(new PlanRouter(
 								controler.getTripRouterProvider().get(),
 								controler.getScenario().getActivityFacilities()
-								), ((MutableScenario)controler.getScenario()), agentsStuckHandler.getAgentsStuck());
+						), ((MutableScenario)controler.getScenario()), agentsStuckHandler.getAgentsStuck());
 					}
 				});
 			}

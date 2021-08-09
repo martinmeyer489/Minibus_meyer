@@ -62,7 +62,7 @@ import com.google.inject.Inject;
 
 /**
  * Black box for paratransit
- * 
+ *
  * @author aneumann
  *
  */
@@ -87,7 +87,7 @@ public final class PBox implements POperators {
 	private final RouteDesignScoringManager routeDesignScoreManager = new RouteDesignScoringManager();
 
 	private final TicketMachineI ticketMachine;
-	
+
 	@Inject(optional=true) private SubsidyI subsidy;
 	HashMap<Id<TransitStopFacility>, Double> actBasedSub = new HashMap<>();
 
@@ -117,7 +117,7 @@ public final class PBox implements POperators {
 
 		// initialize strategy manager
 		this.strategyManager.init(this.pConfig, this.stageCollectorHandler, this.ticketMachine, timeProvider,event.getServices().getControlerIO().getOutputPath(), this.pStopsOnly);
-		
+
 		// initialize route design scoring manager
 		this.routeDesignScoreManager.init(this.pConfig, event.getServices().getScenario().getNetwork());
 
@@ -205,8 +205,8 @@ public final class PBox implements POperators {
 
 
 //			}
-		} else {
-			// create subsidy distribution
+			} else {
+				// create subsidy distribution
 				HashMap<Coord, Integer> nbActivities = new HashMap<>();
 				HashMap<TransitStopFacility, List<Integer>> nbActivitiesAroundStop = new HashMap<>();
 				for (Person person : event.getServices().getScenario().getPopulation().getPersons().values()) {

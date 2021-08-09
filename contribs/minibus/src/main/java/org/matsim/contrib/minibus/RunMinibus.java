@@ -185,12 +185,14 @@ public final class RunMinibus {
 			PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.class);
 			pConfig.setUseSubsidyApproach(true);
 			pConfig.setSubsidyApproach("perPassenger");
+			//pConfig.setSubsidyApproach(null);
 			pConfig.setRouteProvider("TimeAwareComplexCircleScheduleProvider");
 			pConfig.setGridSize(500); // manser used 3000
 			pConfig.setPassengerCarEquivalents(1);
 			pConfig.setNumberOfIterationsForProspecting(10);
 			pConfig.setServiceAreaFile("");
 			pConfig.setVehicleMaximumVelocity(16.6);
+			pConfig.setRouteProvider("TimeAwareComplexCircleScheduleProvider");
 
 
 		}

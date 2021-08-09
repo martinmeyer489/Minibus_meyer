@@ -35,6 +35,8 @@ import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,77 +44,93 @@ import java.util.Map.Entry;
 
 /**
  * Provides random draws of transit stops facilities. The draw is weighted by the number of activities within the stops proximity.
- * 
- * @author aneumann
+ *
+ * @author aneumann, extended by manserpa:
+ *  - artificially reduce the number of stops returned by the provider (more information in P. Manser, 2017)
  *
  */
 final class RandomStopProvider {
-	
+
 	private final static Logger log = Logger.getLogger(RandomStopProvider.class);
-	
+
 	private final double gridSize;
 	private LinkedHashMap<TransitStopFacility, Double> stops2Weight;
 	private double totalWeight = 0.0;
 	private int lastIteration;
+	private LinkedHashMap<String, Integer> gridNodeId2ActsCountMap;
+	private double thresholdActivitiesInGrid = 0.0;
+	private List<Integer> sortedGridNodeId2ActsCountMap;
 
 	private final Population population;
 	private final TransitSchedule pStopsOnly;
 
 	private String outputDir;
 
-	
+
 	public RandomStopProvider(PConfigGroup pConfig, Population population, TransitSchedule pStopsOnly, String outputDir){
 		this.gridSize = pConfig.getGridSize();
 		this.lastIteration = -1;
-		
+
 		this.population = population;
 		this.pStopsOnly = pStopsOnly;
-		this.outputDir = outputDir;		
+		this.outputDir = outputDir;
 	}
-	
+
 	private void updateWeights(){
 		this.stops2Weight = new LinkedHashMap<>();
 		this.totalWeight = 0.0;
 		double numberOfActsInPlans = 0;
-		
+
 		// count acts for all grid nodes
-		LinkedHashMap<String, Integer> gridNodeId2ActsCountMap = new LinkedHashMap<>();
+		this.gridNodeId2ActsCountMap = new LinkedHashMap<>();
 		for (Person person : this.population.getPersons().values()) {
 			for (PlanElement pE : person.getSelectedPlan().getPlanElements()) {
 				if (pE instanceof Activity) {
 					Activity act = (Activity) pE;
 					numberOfActsInPlans++;
 					String gridNodeId = GridNode.getGridNodeIdForCoord(act.getCoord(), this.gridSize);
-					if (gridNodeId2ActsCountMap.get(gridNodeId) == null) {
-						gridNodeId2ActsCountMap.put(gridNodeId, 0);
+					if (this.gridNodeId2ActsCountMap.get(gridNodeId) == null) {
+						this.gridNodeId2ActsCountMap.put(gridNodeId, 0);
 					}
-					gridNodeId2ActsCountMap.put(gridNodeId, gridNodeId2ActsCountMap.get(gridNodeId) + 1);
+					this.gridNodeId2ActsCountMap.put(gridNodeId, this.gridNodeId2ActsCountMap.get(gridNodeId) + 1);
 				}
 			}
 		}
-		
+
+		this.sortedGridNodeId2ActsCountMap = new ArrayList<>();
+
 		// sort facilities for all grid nodes
 		LinkedHashMap<String, List<TransitStopFacility>> gridNodeId2StopsMap = new LinkedHashMap<>();
 		for (TransitStopFacility stop : this.pStopsOnly.getFacilities().values()) {
 			String gridNodeId = GridNode.getGridNodeIdForCoord(stop.getCoord(), this.gridSize);
 			if (gridNodeId2StopsMap.get(gridNodeId) == null) {
 				gridNodeId2StopsMap.put(gridNodeId, new LinkedList<TransitStopFacility>());
+
+				if(this.gridNodeId2ActsCountMap.get(gridNodeId) != null)
+					this.sortedGridNodeId2ActsCountMap.add(this.gridNodeId2ActsCountMap.get(gridNodeId));
 			}
 			gridNodeId2StopsMap.get(gridNodeId).add(stop);
 		}
-		
+
+		Collections.sort(this.sortedGridNodeId2ActsCountMap);
+
+		int percentile60 = (int) (0.25 * this.sortedGridNodeId2ActsCountMap.size());
+
+		this.thresholdActivitiesInGrid = this.sortedGridNodeId2ActsCountMap.get(percentile60);
+
+
 		// associate the number of acts per grid node with the corresponding transit stop facilities
 		for (Entry<String, List<TransitStopFacility>> stopsEntry : gridNodeId2StopsMap.entrySet()) {
-			double actsCountForThisGridNodeId = 0; 
-			if (gridNodeId2ActsCountMap.get(stopsEntry.getKey()) != null) {
-				actsCountForThisGridNodeId = gridNodeId2ActsCountMap.get(stopsEntry.getKey()).doubleValue();
+			double actsCountForThisGridNodeId = 0;
+			if (this.gridNodeId2ActsCountMap.get(stopsEntry.getKey()) != null) {
+				actsCountForThisGridNodeId = this.gridNodeId2ActsCountMap.get(stopsEntry.getKey()).doubleValue();
 			}
-			
+
 			// no acts in this area - ignore the stops in this area as well
 			if (actsCountForThisGridNodeId == 0.0) {
 				continue;
 			}
-			
+
 			// divide count by the number of associated stops, thus neglecting a higher probability for stops located in a dense network area
 			actsCountForThisGridNodeId = actsCountForThisGridNodeId / stopsEntry.getValue().size();
 			for (TransitStopFacility stop : stopsEntry.getValue()) {
@@ -120,7 +138,7 @@ final class RandomStopProvider {
 				this.totalWeight += actsCountForThisGridNodeId;
 			}
 		}
-		
+
 		log.info("Initialized with " + this.stops2Weight.size() + " of " + this.pStopsOnly.getFacilities().values().size() + " stops covering " + (this.totalWeight / numberOfActsInPlans) + " percent of activities");
 	}
 
@@ -130,12 +148,12 @@ final class RandomStopProvider {
 			this.updateWeights();
 			this.writeToFile(currentIteration);
 			this.lastIteration = currentIteration;
-			
+
 			if (this.totalWeight == 0.0) {
 				log.info("No weights found. Probably no population given. Falling back to old behavior.");
 			}
 		}
-		
+
 		if (this.totalWeight == 0.0) {
 			// old version
 			int i = this.pStopsOnly.getFacilities().size();
@@ -147,7 +165,7 @@ final class RandomStopProvider {
 			}
 			return null;
 		}
-		
+
 		double rnd = MatsimRandom.getRandom().nextDouble() * this.totalWeight;
 		double accumulatedWeight = 0.0;
 		for (Entry<TransitStopFacility, Double> stop2WeightEntry : this.stops2Weight.entrySet()) {
@@ -156,14 +174,14 @@ final class RandomStopProvider {
 				return stop2WeightEntry.getKey();
 			}
 		}
-		
+
 		log.warn("Could not find any stop. This should not happen. Check gridSize in config.");
 		return null;
 	}
-	
+
 	/**
 	 * Draws one random transit stop facility from the given choice set with respect to their weights.
-	 * 
+	 *
 	 * @param choiceSet
 	 * @return
 	 */
@@ -177,7 +195,7 @@ final class RandomStopProvider {
 				totalWeightOfChoiceSet += this.stops2Weight.get(stop);
 			}
 		}
-		
+
 		if (totalWeightOfChoiceSet == 0.0) {
 			// old version
 			int i = 0;
@@ -201,11 +219,32 @@ final class RandomStopProvider {
 				return stop;
 			}
 		}
-		
+
 		log.warn("Could not draw a random stop from the given choice set " + choiceSet);
 		return null;
 	}
-	
+
+	/**
+	 * Returns true if the number of activities around a stop is high
+	 *
+	 * @param String containing the grid in which the stop is
+	 * @return
+	 */
+	public boolean hasHighNumberOfActivitiesInGrid(String grid) {
+		if (this.stops2Weight == null) {
+			updateWeights();
+		}
+
+		if(this.gridNodeId2ActsCountMap.get(grid) == null)
+			return false;
+
+		if(this.gridNodeId2ActsCountMap.get(grid) > this.thresholdActivitiesInGrid)
+			return true;
+		else
+			return false;
+
+	}
+
 	private void writeToFile(int currentIteration) {
 		if (this.outputDir == null) {
 			return;
@@ -216,12 +255,13 @@ final class RandomStopProvider {
 				this.outputDir = this.outputDir + PConstants.statsOutputFolder + RandomStopProvider.class.getSimpleName() + "/";
 				new File(this.outputDir).mkdir();
 			}
-			
-			BufferedWriter writer = IOUtils.getBufferedWriter(outputDir + currentIteration + ".stopId2stopWeight.txt.gz");
-			writer.write("# stop id; x; y; weight"); writer.newLine();
-			for (Entry<TransitStopFacility, Double> stopEntry : this.stops2Weight.entrySet()) {
-				writer.write(stopEntry.getKey().getId().toString() + "; " + stopEntry.getKey().getCoord().getX() + "; " + stopEntry.getKey().getCoord().getY() + "; " + stopEntry.getValue().toString()); writer.newLine();
+
+			BufferedWriter writer = IOUtils.getBufferedWriter(outputDir + currentIteration + ".activitiesInGrid.txt.gz");
+			writer.write("activities; 85percentile"); writer.newLine();
+			for (int thisGrid : this.sortedGridNodeId2ActsCountMap) {
+				writer.write(thisGrid + "; " + this.thresholdActivitiesInGrid); writer.newLine();
 			}
+
 			writer.flush();
 			writer.close();
 		} catch (IOException e) {

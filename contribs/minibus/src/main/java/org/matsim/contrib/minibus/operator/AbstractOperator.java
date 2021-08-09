@@ -337,6 +337,14 @@ abstract class AbstractOperator implements Operator{
 			totalAmountOfSubsidies += driverId2ScoreMap.get(vehId).getAmountOfSubsidies();
 		}
 
+		double costPerVehicleDay = 0;
+		for (PConfigGroup.PVehicleSettings pVS : this.pVehicleSettings) {
+			if (plan.getPVehicleType().equals(pVS.getPVehicleName())) {
+				costPerVehicleDay = pVS.getCostPerVehicleAndDay();
+			}
+		}
+
+
 		totalLineScore = capAndAddRouteDesignScore (plan, totalLineScore, routeDesignScoringManager);
 
 		plan.setScore(totalLineScore);

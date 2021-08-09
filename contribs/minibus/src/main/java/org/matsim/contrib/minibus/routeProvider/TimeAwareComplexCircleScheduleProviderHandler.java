@@ -26,6 +26,7 @@ import org.matsim.api.core.v01.events.handler.TransitDriverStartsEventHandler;
 import org.matsim.core.api.experimental.events.VehicleArrivesAtFacilityEvent;
 import org.matsim.core.api.experimental.events.handler.VehicleArrivesAtFacilityEventHandler;
 import org.matsim.pt.transitSchedule.api.TransitRoute;
+import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 import org.matsim.vehicles.Vehicle;
 
 import java.util.ArrayList;
@@ -40,20 +41,33 @@ final class TimeAwareComplexCircleScheduleProviderHandler implements TransitDriv
 	private final static Logger log = Logger.getLogger(TimeAwareComplexCircleScheduleProviderHandler.class);
 	
 	private final String pIdentifier;
+	private LinkedHashMap<Id<Vehicle>, TransitDriverStartsEvent> vehId2StartsEventNew = new LinkedHashMap<>();
+
 	private LinkedHashMap<Id<Vehicle>, TransitDriverStartsEvent> vehId2StartsEvent = new LinkedHashMap<>();
 	private LinkedHashMap<Id<Vehicle>, ArrayList<Double>> vehId2Offset = new LinkedHashMap<>();
 	private LinkedHashMap<Id<TransitRoute>, ArrayList<TinyStatsContainer>> routeId2StatsContrainerMap = new LinkedHashMap<>();
+	private LinkedHashMap<Id<TransitRoute>, ArrayList<Id<TransitStopFacility>>> routeId2TransitStopList = new LinkedHashMap<>();
 
-	
+	private LinkedHashMap<Id<Vehicle>, ArrayList<Id<TransitStopFacility>>> vehId2StopFacility = new LinkedHashMap<>();
+
+
+
 	public TimeAwareComplexCircleScheduleProviderHandler(String pIdentifier) {
 		this.pIdentifier = pIdentifier;
 	}
 
 	@Override
 	public void reset(int iteration) {
+
 		this.vehId2StartsEvent = new LinkedHashMap<>();
+		this.vehId2StartsEventNew = new LinkedHashMap<>();
+
 		this.vehId2Offset = new LinkedHashMap<>();
 		this.routeId2StatsContrainerMap = new LinkedHashMap<>();
+		this.vehId2StopFacility = new LinkedHashMap<>();
+
+		this.routeId2TransitStopList = new LinkedHashMap<>();
+
 	}
 
 	@Override
@@ -63,7 +77,19 @@ final class TimeAwareComplexCircleScheduleProviderHandler implements TransitDriv
 				this.vehId2Offset.put(event.getVehicleId(), new ArrayList<Double>());				
 			}
 			this.vehId2Offset.get(event.getVehicleId()).add(event.getTime());
+
+			// write the stops served by a certain vehicle in a list
+			if (this.vehId2StopFacility.get(event.getVehicleId()) == null) {
+				this.vehId2StopFacility.put(event.getVehicleId(), new ArrayList<Id<TransitStopFacility>>());
+			}
+
+			this.vehId2StopFacility.get(event.getVehicleId()).add(event.getFacilityId());
+
+
+
 		}
+
+
 		
 	}
 
@@ -73,12 +99,37 @@ final class TimeAwareComplexCircleScheduleProviderHandler implements TransitDriv
 			// first complete old entry
 			addEntry2Stats(this.vehId2StartsEvent.get(event.getVehicleId()), this.vehId2Offset.get(event.getVehicleId()));
 			// add new event
+			addStops2List(this.vehId2StartsEventNew.get(event.getVehicleId()), this.vehId2StopFacility.get(event.getVehicleId()));
+
+			this.vehId2StartsEventNew.put(event.getVehicleId(), event);
+			this.vehId2StopFacility.put(event.getVehicleId(), new ArrayList<Id<TransitStopFacility>>());
+
 			this.vehId2StartsEvent.put(event.getVehicleId(), event);
 			this.vehId2Offset.put(event.getVehicleId(), new ArrayList<Double>());
 			
 		}
 		
 	}
+
+	private void addStops2List(TransitDriverStartsEvent event, ArrayList<Id<TransitStopFacility>> stopList)	{
+		if (event == null || stopList == null)	{
+			return;
+		}
+
+		if(this.routeId2TransitStopList.get(event.getTransitRouteId()) == null)	{
+			this.routeId2TransitStopList.put(event.getTransitRouteId(), stopList);
+		}
+	}
+
+	public Id<TransitStopFacility> getServedStopsInLastIteration(Id<TransitRoute> routeID, int stopIndex) {
+		if (this.routeId2TransitStopList.get(routeID) == null) {
+			return null;
+		}
+
+		return this.routeId2TransitStopList.get(routeID).get(stopIndex);
+	}
+
+
 	
 	private void addEntry2Stats(TransitDriverStartsEvent event, ArrayList<Double> offsetList){
 		if (event == null || offsetList == null) {

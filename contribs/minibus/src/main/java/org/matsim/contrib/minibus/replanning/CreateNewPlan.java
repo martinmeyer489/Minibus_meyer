@@ -89,7 +89,8 @@ public final class CreateNewPlan extends AbstractPStrategyModule {
 				log.warn("End time is: " + endTime);
 				log.warn("Will continue anyway...");
 			}
-			
+
+
 			TransitStopFacility stop1 = operator.getRouteProvider().getRandomTransitStop(operator.getCurrentIteration());
 			TransitStopFacility stop2 = operator.getRouteProvider().getRandomTransitStop(operator.getCurrentIteration());
 
