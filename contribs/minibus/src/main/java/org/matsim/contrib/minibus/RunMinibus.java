@@ -90,7 +90,7 @@ public final class RunMinibus {
 
 		// input file
 
-		Config config = ConfigUtils.loadConfig( "/Users/MeyerMa/Desktop/MA/scenarios/berlin/input/config/config_vehicle_types.xml", new PConfigGroup() ) ;
+		Config config = ConfigUtils.loadConfig( "/Users/MeyerMa/Desktop/MA/scenarios/berlin/input/config/config_vehicle_types_new_costs.xml", new PConfigGroup() ) ;
 //		Config config = ConfigUtils.loadConfig("/Users/MeyerMa/IdeaProjects/minibus_meyer/Input/config.xml", new PConfigGroup() ) ;
 		config.network().setInputFile("/Users/MeyerMa/Desktop/minibus/berlin-v5.5.3-1pct.output_network.xml.gz");
 		config.global().setCoordinateSystem("EPSG:31468");
@@ -98,12 +98,13 @@ public final class RunMinibus {
 		config.global().setNumberOfThreads(8);
 
 
-		config.plans().setInputFile("/Users/MeyerMa/Desktop/MA/scenarios/berlin/input/v5.4/v5.4_1pct/berlin-v5.4-1pct.plans_activity_inside_prep_test.xml.gz");
+		config.plans().setInputFile("/Users/MeyerMa/Desktop/minibus/berlin-v5.4-1pct.plans_activity_inside_prep.xml");
 		config.plans().setRemovingUnneccessaryPlanAttributes(true);
 		config.plans().setHandlingOfPlansWithoutRoutingMode(useMainModeIdentifier);
 		config.plans().setNetworkRouteType("LinkNetworkRoute");
 
 		MainModeIdentifier mainModeIdentifier = new MainModeIdentifierImpl();
+
 		TripsToLegsAlgorithm algorithm = new TripsToLegsAlgorithm(mainModeIdentifier);
 
 
@@ -118,7 +119,7 @@ public final class RunMinibus {
 
 
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory("/Users/MeyerMa/Desktop/MA/scenarios/berlin/output/subsidy/subsidy_vehicle_types_test");
+		config.controler().setOutputDirectory("/Users/MeyerMa/Desktop/MA/scenarios/berlin/output/subsidy/subsidy_vehicle_types_per_passenger_new_costs");
 		config.controler().setRunId("per_passenger_1");
 		config.controler().setLastIteration(400);
 		config.controler().setWriteEventsInterval(400);
