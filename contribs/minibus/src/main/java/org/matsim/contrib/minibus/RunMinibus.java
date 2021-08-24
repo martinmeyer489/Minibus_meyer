@@ -90,15 +90,15 @@ public final class RunMinibus {
 
 		// input file
 
-		Config config = ConfigUtils.loadConfig( "/Users/MeyerMa/Desktop/MA/scenarios/berlin/input/config/config_vehicle_types_new_costs.xml", new PConfigGroup() ) ;
+		Config config = ConfigUtils.loadConfig( "C:/Users/marti/Documents/MA/input/config/config_vehicle_types_new_costs.xml", new PConfigGroup() ) ;
 //		Config config = ConfigUtils.loadConfig("/Users/MeyerMa/IdeaProjects/minibus_meyer/Input/config.xml", new PConfigGroup() ) ;
-		config.network().setInputFile("/Users/MeyerMa/Desktop/minibus/berlin-v5.5.3-1pct.output_network.xml.gz");
+		config.network().setInputFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_network.xml.gz");
 		config.global().setCoordinateSystem("EPSG:31468");
 		config.global().setRandomSeed(2);
 		config.global().setNumberOfThreads(8);
 
 
-		config.plans().setInputFile("/Users/MeyerMa/Desktop/minibus/berlin-v5.4-1pct.plans_activity_inside_prep.xml");
+		config.plans().setInputFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.4-1pct.plans_activity_inside_prep.xml");
 		config.plans().setRemovingUnneccessaryPlanAttributes(true);
 		config.plans().setHandlingOfPlansWithoutRoutingMode(useMainModeIdentifier);
 		config.plans().setNetworkRouteType("LinkNetworkRoute");
@@ -114,12 +114,12 @@ public final class RunMinibus {
 
 
 
-		config.transit().setTransitScheduleFile("/Users/MeyerMa/Desktop/minibus/berlin-v5.5.3-1pct.output_transitSchedule_no_bus_in_spandau.xml.gz");
-		config.transit().setVehiclesFile("/Users/MeyerMa/Desktop/minibus/berlin-v5.5.3-1pct.output_transitVehicles.xml.gz");
+		config.transit().setTransitScheduleFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_transitSchedule_no_bus_in_spandau.xml.gz");
+		config.transit().setVehiclesFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_transitVehicles.xml.gz");
 
 
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory("/Users/MeyerMa/Desktop/MA/scenarios/berlin/output/subsidy/subsidy_vehicle_types_per_passenger_new_costs");
+		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output");
 		config.controler().setRunId("per_passenger_1");
 		config.controler().setLastIteration(400);
 		config.controler().setWriteEventsInterval(400);
