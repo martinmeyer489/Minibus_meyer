@@ -168,7 +168,7 @@ abstract class AbstractOperator implements Operator{
 			vehicleType = getBestPlan().getPVehicleType();
 
 		if (vehicleType == null)
-			vehicleType = "Gelenkbus";
+			vehicleType = "Minibus";
 
 
 		for (PConfigGroup.PVehicleSettings pVS : this.pVehicleSettings) {

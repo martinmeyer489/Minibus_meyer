@@ -90,7 +90,7 @@ public final class RunMinibus {
 
 		// input file
 
-		Config config = ConfigUtils.loadConfig( "C:/Users/marti/Documents/MA/input/config/config_vehicle_types_new_costs.xml", new PConfigGroup() ) ;
+		Config config = ConfigUtils.loadConfig( "C:/Users/marti/IdeaProjects/matsim-libs/contribs/minibus/input/config_vehicle_types_new_costs_old.xml", new PConfigGroup() ) ;
 //		Config config = ConfigUtils.loadConfig("/Users/MeyerMa/IdeaProjects/minibus_meyer/Input/config.xml", new PConfigGroup() ) ;
 		config.network().setInputFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_network.xml.gz");
 		config.global().setCoordinateSystem("EPSG:31468");
@@ -119,7 +119,7 @@ public final class RunMinibus {
 
 
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output");
+		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_test");
 		config.controler().setRunId("per_passenger_1");
 		config.controler().setLastIteration(400);
 		config.controler().setWriteEventsInterval(400);
@@ -183,11 +183,11 @@ public final class RunMinibus {
 		boolean subsidies = true;
 		if (subsidies) {
 			PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.class);
-			pConfig.setUseSubsidyApproach(true);
-			pConfig.setSubsidyApproach("perPassenger");
-			//pConfig.setSubsidyApproach(null);
+			pConfig.setUseSubsidyApproach(false);
+			//pConfig.setSubsidyApproach("perPassenger");
+			pConfig.setSubsidyApproach(null);
 			pConfig.setRouteProvider("TimeAwareComplexCircleScheduleProvider");
-			pConfig.setGridSize(500); // manser used 3000
+			pConfig.setGridSize(500); // manser used 300
 			pConfig.setPassengerCarEquivalents(1);
 			pConfig.setNumberOfIterationsForProspecting(10);
 			pConfig.setServiceAreaFile("");

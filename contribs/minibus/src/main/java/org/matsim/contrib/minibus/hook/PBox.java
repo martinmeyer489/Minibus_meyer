@@ -160,9 +160,9 @@ public final class PBox implements POperators {
 			this.pTransitSchedule.addTransitLine(operator.getCurrentTransitLine());
 		}
 
-
+		//should subsidies be applied?
 		if(this.pConfig.getUseSubsidyApproach()) {
-
+			// first check if perPassenger subsidy wanted
 			if (this.pConfig.getSubsidyApproach().equals("perPassenger")){
 
 
@@ -263,8 +263,15 @@ public final class PBox implements POperators {
 				log.info("number of subsidized stops: " + counter);
 			}
 
-			this.ticketMachine.setActBasedSubs(actBasedSub);
+		} else {
+			double subsidies =0;
+
+			for (TransitStopFacility stop : this.pStopsOnly.getFacilities().values()) {
+				actBasedSub.put(stop.getId(), subsidies);
+			}
 		}
+		this.ticketMachine.setActBasedSubs(actBasedSub);
+
 
 
 
