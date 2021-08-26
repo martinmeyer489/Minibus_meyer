@@ -101,7 +101,7 @@ public final class RunMinibus {
 		config.plans().setInputFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.4-1pct.plans_activity_inside_prep.xml");
 		config.plans().setRemovingUnneccessaryPlanAttributes(true);
 		config.plans().setHandlingOfPlansWithoutRoutingMode(useMainModeIdentifier);
-		config.plans().setNetworkRouteType("LinkNetworkRoute");
+//		config.plans().setNetworkRouteType("LinkNetworkRoute");
 
 		MainModeIdentifier mainModeIdentifier = new MainModeIdentifierImpl();
 
@@ -119,7 +119,7 @@ public final class RunMinibus {
 
 
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output");
+		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_1pct_actbased_sub");
 		config.controler().setRunId("basecase");
 		config.controler().setLastIteration(400);
 		config.controler().setWriteEventsInterval(400);
@@ -183,10 +183,7 @@ public final class RunMinibus {
 		boolean subsidies = true;
 		if (subsidies) {
 			PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.class);
-			pConfig.setUseSubsidyApproach(true);
-			pConfig.setSubsidyApproach("perPassenger");
-			//pConfig.setSubsidyApproach(null);
-//			pConfig.setRouteProvider("TimeAwareComplexCircleScheduleProvider");
+			pConfig.setUseSubsidyApproach(true); //activity based appraoch
 //			pConfig.setGridSize(500); // manser used 3000
 //			pConfig.setPassengerCarEquivalents(1);
 //			pConfig.setNumberOfIterationsForProspecting(10);

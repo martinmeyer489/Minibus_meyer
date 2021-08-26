@@ -17,16 +17,16 @@
 		<param name="numberOfOperators" value="10" />
 		<param name="numberOfIterationsForProspecting" value="10" />
 		<param name="initialBudget" value="2001.0" />
-		<param name="paxPerVehicle" value="44" />
+		<param name="paxPerVehicle" value="30" />
 		<param name="passengerCarEquivalents" value="1.0" />
-		<param name="vehicleMaximumVelocity" value="6.0" />
+		<param name="vehicleMaximumVelocity" value="16.6" />
 		<param name="delayPerBoardingPassenger" value="2.0" />
 		<param name="delayPerAlightingPassenger" value="1.0" />
 		<param name="doorOperationMode" value="parallel" />
 		<param name="costPerVehicleAndDay" value="0.0" />
 		<param name="costPerKilometer" value="0.0" />
 		<param name="costPerHour" value="28.70" />
-		<param name="earningsPerBoardingPassenger" value="1.0" />
+		<param name="earningsPerBoardingPassenger" value="200000.0" />
 		<param name="earningsPerKilometerAndPassenger" value="0.0" />
 		<param name="pricePerVehicleBought" value="500.0" />
 		<param name="pricePerVehicleSold" value="500.0" />
@@ -248,5 +248,18 @@
 	<module name="changeMode" >
 		<param name="modes" value="car,pt" />
 	</module>
+
+
+<!--	<module name="ptCounts">-->
+<!--		<param name="inputBoardCountsFile" value="null" />-->
+<!--		<param name="inputAlightCountsFile" value="null" />-->
+<!--		<param name="inputOccupancyCountsFile" value="null" />-->
+<!--		<param name="outputformat" value="null" />-->
+<!--		<param name="distanceFilter" value="null" />-->
+<!--		<param name="countsScaleFactor" value="10" />-->
+<!--		<param name="distanceFilterCenterNode" value="null" />-->
+<!--		&lt;!&ndash; every how many iterations (starting with 0) counts comparisons are generated &ndash;&gt;-->
+<!--		<param name="ptCountsInterval" value="300"/>-->
+<!--	</module>-->
 
 </config>
