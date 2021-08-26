@@ -83,38 +83,72 @@ public final class RunMinibus {
 //	}
 
 
-
-
 	public static void main(final String[] args) {
-		Config config = ConfigUtils.loadConfig( "/Users/MeyerMa/IdeaProjects/data-science-matsim/jobs-infra/docker-build/input/minibus/config_minibus_human_driven_600it.xml", new PConfigGroup() ) ;
+
+
+		// input file
+
+		Config config = ConfigUtils.loadConfig("C:/Users/marti/Documents/MA/input/config/config_minibus_human_driven.xml", new PConfigGroup());
 //		Config config = ConfigUtils.loadConfig("/Users/MeyerMa/IdeaProjects/minibus_meyer/Input/config.xml", new PConfigGroup() ) ;
-		config.network().setInputFile("/Users/MeyerMa/IdeaProjects/data-science-matsim/jobs-infra/docker-build/input/minibus/berlin-v5.5.3-1pct.output_network.xml.gz");
+		config.network().setInputFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_network.xml.gz");
 		config.global().setCoordinateSystem("EPSG:31468");
-		config.global().setRandomSeed(1);
-		config.plans().setInputFile("/Users/MeyerMa/IdeaProjects/data-science-matsim/jobs-infra/docker-build/input/minibus/berlin-v5.4-1pct.plans_activity_inside_prep.xml");
+		config.global().setRandomSeed(2);
+		config.global().setNumberOfThreads(8);
+
+
+		config.plans().setInputFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.4-1pct.plans_activity_inside_prep.xml");
 		config.plans().setRemovingUnneccessaryPlanAttributes(true);
-		config.transit().setTransitScheduleFile("/Users/MeyerMa/IdeaProjects/data-science-matsim/jobs-infra/docker-build/input/minibus/berlin-v5.5.3-1pct.output_transitSchedule_no_bus_in_spandau.xml.gz");
-		config.transit().setVehiclesFile("/Users/MeyerMa/IdeaProjects/data-science-matsim/jobs-infra/docker-build/input/minibus/berlin-v5.5.3-1pct.output_transitVehicles.xml.gz");
-//		config.households().setInputFile();
-//		config.facilities().setInputFile();
-
-		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory("/Users/MeyerMa/Desktop/MA/scenarios/berlin/output/minibus_human_600it_seed1");
-
 		config.plans().setHandlingOfPlansWithoutRoutingMode(useMainModeIdentifier);
-		Scenario scenario = ScenarioUtils.loadScenario(config);
-		config.controler().setRunId("seed_1");
-		config.controler().setLastIteration(600);
-
-
-
+//		config.plans().setNetworkRouteType("LinkNetworkRoute");
 
 		MainModeIdentifier mainModeIdentifier = new MainModeIdentifierImpl();
+
 		TripsToLegsAlgorithm algorithm = new TripsToLegsAlgorithm(mainModeIdentifier);
 
 
+		config.transit().setTransitScheduleFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_transitSchedule_no_bus_in_spandau.xml.gz");
+		config.transit().setVehiclesFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_transitVehicles.xml.gz");
 
-		for (Person person: scenario.getPopulation().getPersons().values())	{
+
+		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_1pct_no_sub_cap_3_earning_200");
+		config.controler().setRunId("basecase");
+		config.controler().setLastIteration(400);
+		config.controler().setWriteEventsInterval(400);
+		config.controler().setWritePlansInterval(400);
+		//config.controler().setRoutingAlgorithmType(""); manser used Dijlstra and i use a star landmarks
+
+		config.planCalcScore().setBrainExpBeta(1);
+		config.planCalcScore().setPathSizeLogitBeta(1);
+		config.planCalcScore().setFractionOfIterationsToStartScoreMSA(null);
+		config.planCalcScore().setLearningRate(1);
+		config.planCalcScore().setUsingOldScoringBelowZeroUtilityDuration(false);
+
+
+		config.plansCalcRoute().setNetworkModes(Collections.singleton("car"));
+		config.plansCalcRoute().setRoutingRandomness(3);
+
+
+		config.qsim().setFlowCapFactor(0.1);
+		config.qsim().setInsertingWaitingVehiclesBeforeDrivingVehicles(false);
+		config.qsim().setNumberOfThreads(8);
+
+
+//		<!-- additional time the router allocates when a line switch happens. Can be interpreted as a 'safety' time that agents need to safely transfer from one line to another -->
+		config.transitRouter().setAdditionalTransferTime(0);
+		//		<!-- Factor with which direct walk generalized cost is multiplied before it is compared to the pt generalized cost.  Set to a very high value to reduce direct walk results. -->
+		config.transitRouter().setDirectWalkFactor(1);
+		//		<!-- step size to increase searchRadius if no stops are found -->
+		config.transitRouter().setExtensionRadius(200);
+		//		<!-- maximum beeline distance between stops that agents could transfer to by walking -->
+		config.transitRouter().setMaxBeelineWalkConnectionDistance(100);
+		//		<!-- the radius in which stop locations are searched, given a start or target coordinate -->
+		config.transitRouter().setSearchRadius(1000);
+
+
+		Scenario scenario = ScenarioUtils.loadScenario(config);
+
+		for (Person person : scenario.getPopulation().getPersons().values()) {
 			Plan plan = person.getSelectedPlan();
 			algorithm.run(plan);
 			for (PlanElement element : plan.getPlanElements()) {
@@ -127,19 +161,21 @@ public final class RunMinibus {
 			}
 		}
 
-
-
 		Controler controler = new Controler(scenario);
 
 		controler.addOverridingModule(new PModule());
 
 
-
-		// if desired, add subsidy approach here
 //		PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.class);
-//		pConfig.setSubsidyApproach("perPassenger");
+//		pConfig.setSubsidyApproach("perPassenger"); //
+//			pConfig.setGridSize(500); // manser used 3000
+//			pConfig.setPassengerCarEquivalents(1);
+//			pConfig.setNumberOfIterationsForProspecting(10);
+//			pConfig.setServiceAreaFile("");
+//			pConfig.setVehicleMaximumVelocity(16.6);
+//			pConfig.setRouteProvider("TimeAwareComplexCircleScheduleProvider");
 
 		controler.run();
-	}
 
+	}
 }
