@@ -11,6 +11,9 @@
 
   <properties>
     <!-- release -->
+    <!-- to skip maven comile test -->
+    <maven.test.skip>true</maven.test.skip>
+
     <matsim.version>13.0</matsim.version>
 
     <!-- smapshot -->
@@ -173,6 +176,7 @@
               <goal>shade</goal>
             </goals>
             <configuration>
+
 
 
 

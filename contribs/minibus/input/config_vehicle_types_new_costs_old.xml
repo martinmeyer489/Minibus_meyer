@@ -194,8 +194,8 @@
 		<!-- name of strategy -->
 		<param name="PVeh_1" value="Minibus" />
 		<param name="VehCapacity_1" value="3" />
-		<param name="VehEarningsPerPaxKilometer_1" value="0" />
-		<param name="VehEarningsPerPaxBoarding_1" value="240" />
+		<param name="VehEarningsPerPaxKilometer_1" value="0.55" />
+		<param name="VehEarningsPerPaxBoarding_1" value="0" />
 		<param name="VehCostPerDay_1" value="0" />
 		<param name="VehCostPerKilometer_1" value="0" />
 		<param name="VehCostPerHour_1" value="28" />
@@ -204,8 +204,8 @@
 		
 		<param name="PVeh_2" value="Standardbus" />
 		<param name="VehCapacity_2" value="9" />
-		<param name="VehEarningsPerPaxKilometer_2" value="0" />
-		<param name="VehEarningsPerPaxBoarding_2" value="20" />
+		<param name="VehEarningsPerPaxKilometer_2" value="0.55" />
+		<param name="VehEarningsPerPaxBoarding_2" value="0" />
 		<param name="VehCostPerDay_2" value="0" />
 		<param name="VehCostPerKilometer_2" value="0" />
 		<param name="VehCostPerHour_2" value="52" />
@@ -214,8 +214,8 @@
 		
 		<param name="PVeh_3" value="Gelenkbus" />
 		<param name="VehCapacity_3" value="15" />
-		<param name="VehEarningsPerPaxKilometer_3" value="0" />
-		<param name="VehEarningsPerPaxBoarding_3" value="2" />
+		<param name="VehEarningsPerPaxKilometer_3" value="0.55" />
+		<param name="VehEarningsPerPaxBoarding_3" value="0" />
 		<param name="VehCostPerDay_3" value="0" />
 		<param name="VehCostPerKilometer_3" value="0" />
 		<param name="VehCostPerHour_3" value="60.0" />
@@ -228,7 +228,7 @@
 		<param name="TopoTypesForStops" value="null" />
 
 		<!-- cost per vehicle and day - will prevent companies from operating only short periods of a day -->
-		<param name="costPerVehicleAndDay" value="0.0" />
+		<param name="costPerVehicleAndDay" value="250.0" />
 		<!-- The amount of time a vehicle is delayed by one single alighting passenger in seconds. -->
 		<param name="delayPerAlightingPassenger" value="1.0" />
 		<!-- The amount of time a vehicle is delayed by one single boarding passenger in seconds. -->

@@ -42,13 +42,16 @@ public final class PRouteProviderFactory {
 
 		RandomPVehicleProvider randomPVehicleProvider = new RandomPVehicleProvider(pConfig);
 
-		if(pConfig.getRouteProvider().equalsIgnoreCase(SimpleBackAndForthScheduleProvider.NAME)){
-			return new SimpleBackAndForthScheduleProvider(pConfig.getPIdentifier(), pStopsOnly, network, randomStopProvider, pConfig.getVehicleMaximumVelocity(), pConfig.getDriverRestTime(), pConfig.getMode());
-		} else if(pConfig.getRouteProvider().equalsIgnoreCase(SimpleCircleScheduleProvider.NAME)){
-			return new SimpleCircleScheduleProvider(pConfig.getPIdentifier(), pStopsOnly, network, randomStopProvider, pConfig.getVehicleMaximumVelocity(), pConfig.getDriverRestTime(), pConfig.getMode());
-		} else if(pConfig.getRouteProvider().equalsIgnoreCase(ComplexCircleScheduleProvider.NAME)){
-			return new ComplexCircleScheduleProvider(pStopsOnly, network, randomStopProvider, pConfig.getVehicleMaximumVelocity(), pConfig.getPlanningSpeedFactor(), pConfig.getDriverRestTime(), pConfig.getMode());
-		} else if(pConfig.getRouteProvider().equalsIgnoreCase(TimeAwareComplexCircleScheduleProvider.NAME)){
+		//comment because depracted
+//		if(pConfig.getRouteProvider().equalsIgnoreCase(SimpleBackAndForthScheduleProvider.NAME)){
+//			return new SimpleBackAndForthScheduleProvider(pConfig.getPIdentifier(), pStopsOnly, network, randomStopProvider, pConfig.getVehicleMaximumVelocity(), pConfig.getDriverRestTime(), pConfig.getMode());
+//		} else
+//		if(pConfig.getRouteProvider().equalsIgnoreCase(SimpleCircleScheduleProvider.NAME)){
+//			return new SimpleCircleScheduleProvider(pConfig.getPIdentifier(), pStopsOnly, network, randomStopProvider, pConfig.getVehicleMaximumVelocity(), pConfig.getDriverRestTime(), pConfig.getMode());
+//		} else if(pConfig.getRouteProvider().equalsIgnoreCase(ComplexCircleScheduleProvider.NAME)){
+//			return new ComplexCircleScheduleProvider(pStopsOnly, network, randomStopProvider, pConfig.getVehicleMaximumVelocity(), pConfig.getPlanningSpeedFactor(), pConfig.getDriverRestTime(), pConfig.getMode());
+//		} else
+		if(pConfig.getRouteProvider().equalsIgnoreCase(TimeAwareComplexCircleScheduleProvider.NAME)){
 			return new TimeAwareComplexCircleScheduleProvider(pStopsOnly, network, randomStopProvider,randomPVehicleProvider, pConfig.getVehicleMaximumVelocity(), pConfig.getPlanningSpeedFactor(), pConfig.getDriverRestTime(), pConfig.getPIdentifier(), eventsManager, pConfig.getMode(),pConfig.getPVehicleSettings());
 		} else {
 			log.error("There is no route provider specified. " + pConfig.getRouteProvider() + " unknown");

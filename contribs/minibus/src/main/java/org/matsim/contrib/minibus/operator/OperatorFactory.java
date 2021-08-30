@@ -43,9 +43,11 @@ final class OperatorFactory {
 	public Operator createNewOperator(Id<Operator> id){
 		if(this.pConfig.getOperatorType().equalsIgnoreCase(BasicOperator.OPERATOR_NAME)){
 			return new BasicOperator(id, this.pConfig, this.franchise);
-		} else if(this.pConfig.getOperatorType().equalsIgnoreCase(MultiPlanOperator.OPERATOR_NAME)){
-			return new MultiPlanOperator(id, this.pConfig, this.franchise);
-		} else if(this.pConfig.getOperatorType().equalsIgnoreCase(CarefulMultiPlanOperator.OPERATOR_NAME)){
+		}
+//		else if(this.pConfig.getOperatorType().equalsIgnoreCase(MultiPlanOperator.OPERATOR_NAME)){
+//			return new MultiPlanOperator(id, this.pConfig, this.franchise);
+//		}
+		else if(this.pConfig.getOperatorType().equalsIgnoreCase(CarefulMultiPlanOperator.OPERATOR_NAME)){
 			return new CarefulMultiPlanOperator(id, this.pConfig, this.franchise);
 		} else {
 			log.error("There is no operator type specified. " + this.pConfig.getOperatorType() + " unknown");
