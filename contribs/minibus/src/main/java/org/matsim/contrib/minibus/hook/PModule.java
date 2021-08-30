@@ -66,7 +66,11 @@ public final class PModule extends AbstractModule {
 					+ " for real studies...");
 //			bind(SubsidyI.class).to(PerPassengerSubsidy.class);
 
-		} else {
+		} else if (ConfigUtils.addOrGetModule(getConfig(), PConfigGroup.class ).getSubsidyApproach().equals("actBased") ){
+			log.info("There is a activity based subsidy added to the fare of each boarding passenger");
+
+
+		}else {
 			log.warn("Unknown subsidy approach: " + ConfigUtils.addOrGetModule(getConfig(), PConfigGroup.class ).getSubsidyApproach());
 			log.warn("Add the following lines of code to your run class:");
 			log.warn("");

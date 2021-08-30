@@ -70,6 +70,7 @@ public final class TicketMachineDefaultImpl implements TicketMachineI {
 		}
 
 
+		System.out.println("subsidy"+this.amountOfSubsidies );
 		return earningsPerBoardingPassenger + this.amountOfSubsidies +
 				earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter();
 	}

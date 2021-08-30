@@ -163,7 +163,7 @@ public final class PBox implements POperators {
 		//should subsidies be applied?
 		if(this.pConfig.getUseSubsidyApproach()) {
 			// first check if perPassenger subsidy wanted
-				if (this.pConfig.getSubsidyApproach().equals("PerPassenger")){
+				if (this.pConfig.getSubsidyApproach().equals("perPassenger")){
 
 					double subsidies =1;
 
@@ -171,7 +171,7 @@ public final class PBox implements POperators {
 						actBasedSub.put(stop.getId(), subsidies);
 					}
 
-				}else {
+				}else if (this.pConfig.getSubsidyApproach().equals("perPassenger")){
 				// create subsidy distribution
 				HashMap<Coord, Integer> nbActivities = new HashMap<>();
 				HashMap<TransitStopFacility, List<Integer>> nbActivitiesAroundStop = new HashMap<>();

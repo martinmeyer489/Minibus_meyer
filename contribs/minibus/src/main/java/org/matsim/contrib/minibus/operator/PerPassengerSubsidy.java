@@ -59,7 +59,7 @@ public class PerPassengerSubsidy implements SubsidyI {
 	private Map<Id<PPlan>, Double> welfareCorrection;
 	private Map<Id<PPlan>, Set<Id<Person>>> pId2persons;
 
-	private final double subsidyPerPassenger = 100000.;
+	private final double subsidyPerPassenger = 0.;
 	
 	@Inject
 	Scenario scenario;
