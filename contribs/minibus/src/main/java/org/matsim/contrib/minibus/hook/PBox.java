@@ -163,49 +163,15 @@ public final class PBox implements POperators {
 		//should subsidies be applied?
 		if(this.pConfig.getUseSubsidyApproach()) {
 			// first check if perPassenger subsidy wanted
-			if (this.pConfig.getSubsidyApproach().equals("perPassenger")){
+				if (this.pConfig.getSubsidyApproach().equals("PerPassenger")){
 
+					double subsidies =0;
 
-				double subsidies =1;
+					for (TransitStopFacility stop : this.pStopsOnly.getFacilities().values()) {
+						actBasedSub.put(stop.getId(), subsidies);
+					}
 
-				for (TransitStopFacility stop : this.pStopsOnly.getFacilities().values()) {
-					actBasedSub.put(stop.getId(), subsidies);
-				}
-
-
-
-
-
-//			for (Person person : event.getServices().getScenario().getPopulation().getPersons().values()){
-
-				// Get the PPlan which is used by this person.
-//				for (PlanElement pE : person.getSelectedPlan().getPlanElements()){
-//
-//					if (pE instanceof Leg) {
-//
-//						Leg leg = (Leg) pE;
-//
-//						if (leg.getMode().equals(TransportMode.pt)) {
-//
-//							TransitPassengerRoute route = (TransitPassengerRoute) leg.getRoute();
-//							String planIdString = route.getRouteId().toString();
-//							Id<PPlan> pId = Id.create(planIdString, PPlan.class);
-//
-//							if (this.pId2persons.get(pId) != null) {
-//								this.pId2persons.get(pId).add(person.getId());
-//							} else {
-//								Set<Id<Person>> persons = new HashSet<>();
-//								persons.add(person.getId());
-//								this.pId2persons.put(pId, persons);
-//							}
-//
-//						}
-//					}
-//				}
-
-
-//			}
-			} else {
+				}else {
 				// create subsidy distribution
 				HashMap<Coord, Integer> nbActivities = new HashMap<>();
 				HashMap<TransitStopFacility, List<Integer>> nbActivitiesAroundStop = new HashMap<>();
@@ -222,14 +188,15 @@ public final class PBox implements POperators {
 					}
 				}
 
+
 				for (TransitStopFacility stop : this.pStopsOnly.getFacilities().values()) {
-					nbActivitiesAroundStop.putIfAbsent(stop, new ArrayList<>(Arrays.asList(0,0)));
+					nbActivitiesAroundStop.putIfAbsent(stop, new ArrayList<>(Arrays.asList(0, 0)));
 					for (Coord actCoord : nbActivities.keySet()) {
-						if(NetworkUtils.getEuclideanDistance(actCoord, stop.getCoord()) < 500)  {
+						if (NetworkUtils.getEuclideanDistance(actCoord, stop.getCoord()) < 500) {
 							int nbActs = nbActivities.get(actCoord);
 							nbActivitiesAroundStop.get(stop).set(0, nbActivitiesAroundStop.get(stop).get(0) + nbActs);
 						}
-						if(NetworkUtils.getEuclideanDistance(actCoord, stop.getCoord()) < 3000)  {
+						if (NetworkUtils.getEuclideanDistance(actCoord, stop.getCoord()) < 3000) {
 							int nbActs = nbActivities.get(actCoord);
 							nbActivitiesAroundStop.get(stop).set(1, nbActivitiesAroundStop.get(stop).get(1) + nbActs);
 						}
@@ -250,9 +217,7 @@ public final class PBox implements POperators {
 				for(TransitStopFacility stop: nbActivitiesAroundStop.keySet())	{
 					double activities = nbActivitiesAroundStop.get(stop).get(0)+ (0.1 * nbActivitiesAroundStop.get(stop).get(1));
 					double subsidies = 300 - ( 50 * Math.pow(2, (activities * 0.0021) ) );
-					//MM: csv for development only
-//				bw_stops.write(String.valueOf(stop.getId())+","+String.valueOf(stop.getCoord().getX())+","+String.valueOf(stop.getCoord().getY())+","+String.valueOf(activities) + "," + String.valueOf(nbActivitiesAroundStop.get(stop).get(0)) + "," + String.valueOf((0.1 * nbActivitiesAroundStop.get(stop).get(1)))+","+String.valueOf(subsidies));
-//				bw_stops.newLine();
+
 					if(subsidies > 0.0)	{
 						counter++;
 						actBasedSub.put(stop.getId(), subsidies);
@@ -262,15 +227,9 @@ public final class PBox implements POperators {
 
 				log.info("number of subsidized stops: " + counter);
 			}
+			this.ticketMachine.setActBasedSubs(actBasedSub);
 
-		} else {
-			double subsidies =0;
-
-			for (TransitStopFacility stop : this.pStopsOnly.getFacilities().values()) {
-				actBasedSub.put(stop.getId(), subsidies);
-			}
 		}
-		this.ticketMachine.setActBasedSubs(actBasedSub);
 
 
 

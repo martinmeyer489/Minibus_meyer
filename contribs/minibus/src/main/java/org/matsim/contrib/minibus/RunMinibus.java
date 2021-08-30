@@ -119,7 +119,7 @@ public final class RunMinibus {
 
 
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_test");
+		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_test2");
 		config.controler().setRunId("per_passenger_1");
 		config.controler().setLastIteration(400);
 		config.controler().setWriteEventsInterval(400);
@@ -183,10 +183,8 @@ public final class RunMinibus {
 		boolean subsidies = true;
 		if (subsidies) {
 			PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.class);
-			pConfig.setUseSubsidyApproach(false);
-			//pConfig.setSubsidyApproach("perPassenger");
-			pConfig.setSubsidyApproach(null);
-			pConfig.setRouteProvider("TimeAwareComplexCircleScheduleProvider");
+			pConfig.setUseSubsidyApproach(true);
+			pConfig.setSubsidyApproach("perPassenger");
 			pConfig.setGridSize(500); // manser used 300
 			pConfig.setPassengerCarEquivalents(1);
 			pConfig.setNumberOfIterationsForProspecting(10);
