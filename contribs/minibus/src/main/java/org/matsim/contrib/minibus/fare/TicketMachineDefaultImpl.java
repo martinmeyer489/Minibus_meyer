@@ -68,7 +68,7 @@ public final class TicketMachineDefaultImpl implements TicketMachineI {
 			this.amountOfSubsidies = 0;
 			this.isSubsidized = false;
 		}
-
+		//System.out.println("subsidy"+this.amountOfSubsidies);
 		return earningsPerBoardingPassenger + this.amountOfSubsidies +
 				earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter();
 	}

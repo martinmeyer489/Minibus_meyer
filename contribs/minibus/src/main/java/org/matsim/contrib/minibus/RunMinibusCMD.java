@@ -61,7 +61,7 @@ public final class RunMinibusCMD {
 
     public static void main(final String[] args) throws CommandLine.ConfigurationException, FactoryException {
         List<String> cmdOptions = Arrays.asList("config-path", "iterations", "output-path", "demand-path",
-                "network-path", "seed", "subsidy");
+                "network-path", "seed", "use-sub","sub-approach");
         List<String> mergedOptions = new ArrayList<String>();
         mergedOptions.addAll(cmdOptions);
         // Create command line object
@@ -81,6 +81,9 @@ public final class RunMinibusCMD {
         config.network().setInputFile(networkpath);
 
         config.global().setCoordinateSystem("EPSG:31468");
+        config.global().setNumberOfThreads(32);
+        config.parallelEventHandling().setNumberOfThreads(32);
+        config.qsim().setNumberOfThreads(32);
 
         config.controler().setLastIteration(400);
         if (cmd.hasOption("iterations")) {
@@ -92,7 +95,12 @@ public final class RunMinibusCMD {
         }
 
 
-        config.plans().setInputFile("berlin-v5.4-1pct.plans_activity_inside_prep.xml");
+        String demandpath="berlin-v5.4-1pct.plans_activity_inside_prep.xml";
+        if (cmd.hasOption("demand-path")) {
+            demandpath=cmd.getOption("demand-path").get();
+        }
+        config.plans().setInputFile(demandpath);
+        config.plans().setNetworkRouteType("LinkNetworkRoute");
         config.plans().setRemovingUnneccessaryPlanAttributes(true);
         config.transit().setTransitScheduleFile("berlin-v5.5.3-1pct.output_transitSchedule_no_bus_in_spandau.xml.gz");
         config.transit().setVehiclesFile("berlin-v5.5.3-1pct.output_transitVehicles.xml.gz");
@@ -138,16 +146,22 @@ public final class RunMinibusCMD {
         controler.addOverridingModule(new PModule());
 
 
-
-        boolean subsidies = true;
-        if (subsidies) {
+        if (Boolean.parseBoolean(cmd.getOption("use-sub").get())) {
             PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.class);
             pConfig.setUseSubsidyApproach(true);
+            pConfig.setSubsidyApproach(cmd.getOption("sub-approach").get().toString());
+//            pConfig.setGridSize(500); // manser used 300
+//            pConfig.setPassengerCarEquivalents(1);
+//            pConfig.setNumberOfIterationsForProspecting(10);
+//            pConfig.setServiceAreaFile("");
+//            pConfig.setVehicleMaximumVelocity(16.6);
+//            pConfig.setRouteProvider("TimeAwareComplexCircleScheduleProvider");
         }
+
+
 
         controler.run();
     }
 
 }
-
 

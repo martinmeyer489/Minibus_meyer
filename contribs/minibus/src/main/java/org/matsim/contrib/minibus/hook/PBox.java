@@ -62,7 +62,7 @@ import com.google.inject.Inject;
 
 /**
  * Black box for paratransit
- * 
+ *
  * @author aneumann
  *
  */
@@ -87,12 +87,12 @@ public final class PBox implements POperators {
 	private final RouteDesignScoringManager routeDesignScoreManager = new RouteDesignScoringManager();
 
 	private final TicketMachineI ticketMachine;
-	
+
 	@Inject(optional=true) private SubsidyI subsidy;
 	HashMap<Id<TransitStopFacility>, Double> actBasedSub = new HashMap<>();
 
 
-	// yy my intuition would be to pass an empty subsidy rather than making it optional. 
+	// yy my intuition would be to pass an empty subsidy rather than making it optional.
 
 	/**
 	 * Constructor that allows to set the ticketMachine.  Deliberately in constructor and not as setter to keep the variable final.  Might be
@@ -104,7 +104,7 @@ public final class PBox implements POperators {
 		this.scorePlansHandler = new PScorePlansHandler(this.ticketMachine);
 		this.stageCollectorHandler = new StageContainerCreator(this.pConfig.getPIdentifier());
 		this.operatorCostCollectorHandler = new OperatorCostCollectorHandler(this.pConfig.getPIdentifier(), this.pConfig.getCostPerVehicleAndDay(), this.pConfig.getCostPerKilometer() / 1000.0, this.pConfig.getCostPerHour() / 3600.0);
-		this.franchise = new PFranchise(this.pConfig.getUseFranchise(), pConfig.getGridSize());	
+		this.franchise = new PFranchise(this.pConfig.getUseFranchise(), pConfig.getGridSize());
 	}
 
 	void notifyStartup(StartupEvent event) throws IOException {
@@ -115,7 +115,7 @@ public final class PBox implements POperators {
 
 		// initialize strategy manager
 		this.strategyManager.init(this.pConfig, this.stageCollectorHandler, this.ticketMachine, timeProvider);
-		
+
 		// initialize route design scoring manager
 		this.routeDesignScoreManager.init(this.pConfig, event.getServices().getScenario().getNetwork());
 
@@ -158,48 +158,74 @@ public final class PBox implements POperators {
 			this.pTransitSchedule.addTransitLine(operator.getCurrentTransitLine());
 		}
 
-
-		// create subsidy distribution
-		HashMap<Id<TransitStopFacility>, Double> actBasedSub = new HashMap<>();
+		//should subsidies be applied?
 		if(this.pConfig.getUseSubsidyApproach()) {
-			HashMap<Coord, Integer> nbActivities = new HashMap<>();
-			HashMap<TransitStopFacility, List<Integer>> nbActivitiesAroundStop = new HashMap<>();
-			for (Person person : event.getServices().getScenario().getPopulation().getPersons().values()) {
-				for (PlanElement pE : person.getSelectedPlan().getPlanElements()) {
-					if (pE instanceof Activity) {
-						Activity act = (Activity) pE;
-						if (!act.getType().equals("pt interaction") && !act.getType().equals("outside")) {
-							nbActivities.putIfAbsent(act.getCoord(), 0);
-							nbActivities.put(act.getCoord(), nbActivities.get(act.getCoord()) + 1);
+			// first check if perPassenger subsidy wanted
+			if (this.pConfig.getSubsidyApproach().equals("perPassenger")){
+
+				double subsidies =1;
+
+				for (TransitStopFacility stop : this.pStopsOnly.getFacilities().values()) {
+					actBasedSub.put(stop.getId(), subsidies);
+				}
+
+			}else if (this.pConfig.getSubsidyApproach().equals("actBased")){
+				// create subsidy distribution
+				HashMap<Coord, Integer> nbActivities = new HashMap<>();
+				HashMap<TransitStopFacility, List<Integer>> nbActivitiesAroundStop = new HashMap<>();
+				for (Person person : event.getServices().getScenario().getPopulation().getPersons().values()) {
+					for (PlanElement pE : person.getSelectedPlan().getPlanElements()) {
+						if (pE instanceof Activity) {
+							Activity act = (Activity) pE;
+							//filter some activities out
+							if (!act.getType().equals("pt interaction") && !act.getType().equals("outside")) {
+								nbActivities.putIfAbsent(act.getCoord(), 0);
+								nbActivities.put(act.getCoord(), nbActivities.get(act.getCoord()) + 1);
+							}
 						}
 					}
 				}
-			}
 
-			for (TransitStopFacility stop : this.pStopsOnly.getFacilities().values()) {
-				nbActivitiesAroundStop.putIfAbsent(stop, new ArrayList<>(Arrays.asList(0,0)));
-				for (Coord actCoord : nbActivities.keySet()) {
-					if(NetworkUtils.getEuclideanDistance(actCoord, stop.getCoord()) < 500)  {
-						int nbActs = nbActivities.get(actCoord);
-						nbActivitiesAroundStop.get(stop).set(0, nbActivitiesAroundStop.get(stop).get(0) + nbActs);
-					}
-					if(NetworkUtils.getEuclideanDistance(actCoord, stop.getCoord()) < 3000)  {
-						int nbActs = nbActivities.get(actCoord);
-						nbActivitiesAroundStop.get(stop).set(1, nbActivitiesAroundStop.get(stop).get(1) + nbActs);
+
+				for (TransitStopFacility stop : this.pStopsOnly.getFacilities().values()) {
+					nbActivitiesAroundStop.putIfAbsent(stop, new ArrayList<>(Arrays.asList(0, 0)));
+					for (Coord actCoord : nbActivities.keySet()) {
+						if (NetworkUtils.getEuclideanDistance(actCoord, stop.getCoord()) < 500) {
+							int nbActs = nbActivities.get(actCoord);
+							nbActivitiesAroundStop.get(stop).set(0, nbActivitiesAroundStop.get(stop).get(0) + nbActs);
+						}
+						if (NetworkUtils.getEuclideanDistance(actCoord, stop.getCoord()) < 3000) {
+							int nbActs = nbActivities.get(actCoord);
+							nbActivitiesAroundStop.get(stop).set(1, nbActivitiesAroundStop.get(stop).get(1) + nbActs);
+						}
 					}
 				}
+
+
+//			File stops = new File("/Users/MeyerMa/Desktop/MA/scenarios/berlin/output/subsidy/activites.csv");
+//			FileWriter fw_stops = new FileWriter(stops);
+//			BufferedWriter bw_stops = new BufferedWriter(fw_stops);
+//
+//
+//			bw_stops.write("stopID,stop coord x,stop coord y,activity total,activity 500,activity 3000,subsidy");
+//			bw_stops.newLine();
+
+				int counter = 0;
+
+				for(TransitStopFacility stop: nbActivitiesAroundStop.keySet())	{
+					double activities = nbActivitiesAroundStop.get(stop).get(0)+ (0.1 * nbActivitiesAroundStop.get(stop).get(1));
+					double subsidies = 100 - ( 5 * Math.pow(2, (activities * 0.0021) ) );
+
+					if(subsidies > 0.0)	{
+						counter++;
+						actBasedSub.put(stop.getId(), subsidies);
+					}
+				}
+
+
+				log.info("number of subsidized stops: " + counter);
 			}
 
-			int counter = 0;
-			for(TransitStopFacility stop: nbActivitiesAroundStop.keySet())	{
-				double activities = nbActivitiesAroundStop.get(stop).get(0) + (0.1 * nbActivitiesAroundStop.get(stop).get(1));
-				double subsidies = 60 - ( 0.5 * Math.pow(2, (activities * 0.0021) ) );
-				if(subsidies > 0.0)	{
-					counter++;
-					actBasedSub.put(stop.getId(), subsidies);
-				}
-			}
-			log.info("number of subsidized stops: " + counter);
 		}
 
 		this.ticketMachine.setActBasedSubs(actBasedSub);
