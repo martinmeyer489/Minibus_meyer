@@ -97,8 +97,8 @@ public final class RunMinibus {
 		config.global().setRandomSeed(2);
 		config.global().setNumberOfThreads(8);
 
-		config.plans().setInputFile("C:/Users/marti/Documents/MA/input/v5.4/v5.4_10pct/berlin-v5.4-10pct.plans_act_inside_prep.xml.gz");
-		//config.plans().setInputFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.4-1pct.plans_activity_inside_prep.xml");
+		//config.plans().setInputFile("C:/Users/marti/Documents/MA/input/v5.4/v5.4_10pct/berlin-v5.4-10pct.plans_act_inside_prep.xml.gz");
+		config.plans().setInputFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.4-1pct.plans_activity_inside_prep.xml");
 		config.plans().setRemovingUnneccessaryPlanAttributes(true);
 		config.plans().setHandlingOfPlansWithoutRoutingMode(useMainModeIdentifier);
 		config.plans().setNetworkRouteType("LinkNetworkRoute");
@@ -119,7 +119,7 @@ public final class RunMinibus {
 
 
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_actbased_sub");
+		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_actBased_sub");
 		config.controler().setRunId("per_passenger_1");
 		config.controler().setLastIteration(400);
 		config.controler().setWriteEventsInterval(400);

@@ -171,7 +171,7 @@ public final class PBox implements POperators {
 						actBasedSub.put(stop.getId(), subsidies);
 					}
 
-				}else if (this.pConfig.getSubsidyApproach().equals("perPassenger")){
+				}else if (this.pConfig.getSubsidyApproach().equals("actBased")){
 				// create subsidy distribution
 				HashMap<Coord, Integer> nbActivities = new HashMap<>();
 				HashMap<TransitStopFacility, List<Integer>> nbActivitiesAroundStop = new HashMap<>();
