@@ -119,7 +119,7 @@ public final class RunMinibus {
 
 
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_actBased_sub");
+		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_no_sub");
 		config.controler().setRunId("per_passenger_1");
 		config.controler().setLastIteration(400);
 		config.controler().setWriteEventsInterval(400);
@@ -180,7 +180,7 @@ public final class RunMinibus {
 
 
 
-		boolean subsidies = true;
+		boolean subsidies = false;
 		if (subsidies) {
 			PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.class);
 			pConfig.setUseSubsidyApproach(true);

@@ -216,7 +216,7 @@ public final class PBox implements POperators {
 
 				for(TransitStopFacility stop: nbActivitiesAroundStop.keySet())	{
 					double activities = nbActivitiesAroundStop.get(stop).get(0)+ (0.1 * nbActivitiesAroundStop.get(stop).get(1));
-					double subsidies = 100 - ( 50 * Math.pow(2, (activities * 0.0021) ) );
+					double subsidies = 100 - ( 5 * Math.pow(2, (activities * 0.0021) ) );
 
 					if(subsidies > 0.0)	{
 						counter++;
@@ -227,10 +227,10 @@ public final class PBox implements POperators {
 
 				log.info("number of subsidized stops: " + counter);
 			}
-			this.ticketMachine.setActBasedSubs(actBasedSub);
 
 		}
 
+		this.ticketMachine.setActBasedSubs(actBasedSub);
 
 
 
