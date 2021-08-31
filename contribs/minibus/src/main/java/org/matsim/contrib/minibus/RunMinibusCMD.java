@@ -91,8 +91,12 @@ public final class RunMinibusCMD {
             config.global().setRandomSeed(Integer.parseInt(cmd.getOption("seed").get()));
         }
 
+        String demandpath="berlin-v5.4-1pct.plans_activity_inside_prep.xml";
+        if (cmd.hasOption("demand-path")) {
+            demandpath=cmd.getOption("demand-path").get();
+        }
+        config.plans().setInputFile(demandpath);
 
-        config.plans().setInputFile("berlin-v5.4-1pct.plans_activity_inside_prep.xml");
         config.plans().setRemovingUnneccessaryPlanAttributes(true);
         config.transit().setTransitScheduleFile("berlin-v5.5.3-1pct.output_transitSchedule_no_bus_in_spandau.xml.gz");
         config.transit().setVehiclesFile("berlin-v5.5.3-1pct.output_transitVehicles.xml.gz");
