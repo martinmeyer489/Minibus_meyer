@@ -41,6 +41,8 @@ public final class TicketMachineDefaultImpl implements TicketMachineI {
 	
 	@Override
 	public double getFare(StageContainer stageContainer) {
+
+		//System.out.println("earningsperkm"+this.earningsPerMeterAndPassenger*stageContainer.getDistanceTravelledInMeter());
 		return this.earningsPerBoardingPassenger + this.earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter();
 	}
 }

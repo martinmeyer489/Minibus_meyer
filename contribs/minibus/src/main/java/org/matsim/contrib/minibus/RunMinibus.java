@@ -88,7 +88,7 @@ public final class RunMinibus {
 
 		// input file
 
-		Config config = ConfigUtils.loadConfig("C:/Users/marti/Documents/MA/input/config/config_minibus_human_driven.xml", new PConfigGroup());
+		Config config = ConfigUtils.loadConfig("C:/Users/marti/Documents/MA/input/config/config_subsidy_0_55_km.xml", new PConfigGroup());
 //		Config config = ConfigUtils.loadConfig("/Users/MeyerMa/IdeaProjects/minibus_meyer/Input/config.xml", new PConfigGroup() ) ;
 		config.network().setInputFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_network.xml.gz");
 		config.global().setCoordinateSystem("EPSG:31468");
@@ -111,7 +111,7 @@ public final class RunMinibus {
 
 
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_1pct_no_sub_cap_3_earning_200");
+		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_test_1pct_master");
 		config.controler().setRunId("basecase");
 		config.controler().setLastIteration(400);
 		config.controler().setWriteEventsInterval(400);
