@@ -81,6 +81,9 @@ public final class RunMinibusCMD {
         config.network().setInputFile(networkpath);
 
         config.global().setCoordinateSystem("EPSG:31468");
+        config.global().setNumberOfThreads(32);
+        config.parallelEventHandling().setNumberOfThreads(32);
+        config.qsim().setNumberOfThreads(32);
 
         config.controler().setLastIteration(400);
         if (cmd.hasOption("iterations")) {
