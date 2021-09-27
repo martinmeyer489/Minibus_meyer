@@ -58,14 +58,13 @@ public final class ChooseVehicleType extends AbstractPStrategyModule {
         double numberOfVehiclesOld = oldPlan.getTotalPassengerKilometer() / oldPlan.getPassengerKilometerPerVehicle();
         //double headway = (2 * this.pConfig.getDriverRestTime() + routeBack.getStops().get(routeBack.getStops().size() - 1).getDepartureOffset().seconds() +
          //       routeForth.getStops().get(routeForth.getStops().size() - 1).getDepartureOffset().seconds()) / numberOfVehiclesOld;
-        //double headway =  (this.pConfig.getDriverRestTime() + route.getStops().get(route.getStops().size() - 1).getDepartureOffset()) / numberOfVehiclesOld;
-        double headway = oldPlan.getHeadway();
+        double headway =  (this.pConfig.getDriverRestTime() + route.getStops().get(route.getStops().size() - 1).getDepartureOffset().seconds()) / numberOfVehiclesOld;
+        //double headway = oldPlan.getHeadway();
         double vehiclesPerHourOld = 3600 / headway;
 
 
         String pVehicleTypeOld = oldPlan.getPVehicleType();
         String pVehicleTypeNew = pVehicleTypeOld;
-
         // choose the desired vehicle type (may not be the best)
         while(pVehicleTypeOld.equals(pVehicleTypeNew))	{
             pVehicleTypeNew = operator.getRouteProvider().getRandomPVehicle();
@@ -252,7 +251,7 @@ public final class ChooseVehicleType extends AbstractPStrategyModule {
         else if (isDowngrade)
             probabilityToChange = 1 / ( 1 + 15 * Math.exp(-deltaOccupancy / 2.2));
 
-        //log.info("Probability to change: " + probabilityToChange);
+        log.info("##############Probability to change: " + probabilityToChange);
 
         double rndTreshold = MatsimRandom.getRandom().nextDouble();
         //log.info("Treshold: " + rndTreshold);

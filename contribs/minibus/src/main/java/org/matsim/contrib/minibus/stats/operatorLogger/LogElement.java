@@ -259,13 +259,13 @@ public final class LogElement {
 		strB.append(DELIMITER).append(NOVALUE);
 		strB.append(DELIMITER).append(NOVALUE);
 		strB.append(DELIMITER).append(NOVALUE);
-		strB.append(DELIMITER).append(nVeh);
 		strB.append(DELIMITER).append(NOVALUE);
 		strB.append(DELIMITER).append(NOVALUE);
 		strB.append(DELIMITER).append(NOVALUE);
-		strB.append(DELIMITER).append(nPax);
-		strB.append(DELIMITER).append(score);
-		strB.append(DELIMITER).append(budget);
+		strB.append(DELIMITER).append(NOVALUE);
+		strB.append(DELIMITER).append(NOVALUE);
+		strB.append(DELIMITER).append(NOVALUE);
+		strB.append(DELIMITER).append(NOVALUE);
 		strB.append(DELIMITER).append(NOVALUE);
 		strB.append(DELIMITER).append(NOVALUE);
 		strB.append(DELIMITER).append(NOVALUE);

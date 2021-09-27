@@ -31,6 +31,8 @@ import org.matsim.contrib.minibus.PConfigGroup;
 import org.matsim.contrib.minibus.hook.PModule;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.ControlerConfigGroup;
+import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.population.algorithms.TripsToLegsAlgorithm;
@@ -90,7 +92,7 @@ public final class RunMinibus {
 
 		// input file
 
-		Config config = ConfigUtils.loadConfig( "C:/Users/marti/IdeaProjects/matsim-libs/contribs/minibus/input/config_vehicle_types_0_55_earnings_per_km.xml", new PConfigGroup() ) ;
+		Config config = ConfigUtils.loadConfig( "C:/Users/marti/Documents/MA/input/config/config_tirachini.xml", new PConfigGroup() ) ;
 //		Config config = ConfigUtils.loadConfig("/Users/MeyerMa/IdeaProjects/minibus_meyer/Input/config.xml", new PConfigGroup() ) ;
 		config.network().setInputFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_network.xml.gz");
 		config.global().setCoordinateSystem("EPSG:31468");
@@ -114,33 +116,80 @@ public final class RunMinibus {
 
 
 
-		config.transit().setTransitScheduleFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_transitSchedule_no_bus_in_spandau.xml.gz");
-		config.transit().setVehiclesFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_transitVehicles.xml.gz");
 
 
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_no_sub");
+		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_test_vehicletypes_no_sub_new_headway_gelenkbus_default_operator_15_new");
 		config.controler().setRunId("per_passenger_1");
 		config.controler().setLastIteration(400);
 		config.controler().setWriteEventsInterval(400);
 		config.controler().setWritePlansInterval(400);
-		//config.controler().setRoutingAlgorithmType(""); manser used Dijlstra and i use a star landmarks
+		//config.controler().setWriteSnapshotsInterval(1);
+		//config.controler().setRoutingAlgorithmType(ControlerConfigGroup.RoutingAlgorithmType.valueOf("Dijkstra")); //manser used Dijlstra and i use a star landmarks
+		//config.controler().setCompressionType(ControlerConfigGroup.CompressionType.valueOf("none"));
+//
+//		config.planCalcScore().setBrainExpBeta(1);
+//		config.planCalcScore().setPathSizeLogitBeta(1);
+//		config.planCalcScore().setFractionOfIterationsToStartScoreMSA(null);
+//		config.planCalcScore().setLearningRate(1);
+//		config.planCalcScore().setUsingOldScoringBelowZeroUtilityDuration(false);
+//		config.planCalcScore().setWriteExperiencedPlans(false);
 
-		config.planCalcScore().setBrainExpBeta(1);
-		config.planCalcScore().setPathSizeLogitBeta(1);
-		config.planCalcScore().setFractionOfIterationsToStartScoreMSA(null);
-		config.planCalcScore().setLearningRate(1);
-		config.planCalcScore().setUsingOldScoringBelowZeroUtilityDuration(false);
 
-
-		config.plansCalcRoute().setNetworkModes(Collections.singleton("car"));
+		//config.plansCalcRoute().setNetworkModes(Collections.singleton("car"));
 		config.plansCalcRoute().setRoutingRandomness(3);
 
 
+		//config.qsim().setEndTime(Double.parseDouble("30:00:00"));
+		//config.qsim().setFlowCapFactor(0.1);
+		//config.qsim().setInsertingWaitingVehiclesBeforeDrivingVehicles(false);
+		//config.qsim().isRestrictingSeepage(true);
+		//config.qsim().isSeepModeStorageFree(false);
+		//config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.valueOf("FIFO"));
+		//config.qsim().setLinkWidthForVis(30.0F);
+		//config.qsim().setMainModes(Collections.singleton("car"));
+		//config.qsim().setNodeOffset(0);
+		//config.qsim().setNumberOfThreads(8);
+		//config.qsim().setRemoveStuckVehicles(false);
+		//config.qsim().setSeepModes(Collections.singleton("bike"));
+		//config.qsim().setSimEndtimeInterpretation(QSimConfigGroup.EndtimeInterpretation.valueOf("onlyUseEndtime"));
+		//config.qsim().setSimStarttimeInterpretation(QSimConfigGroup.StarttimeInterpretation.valueOf("maxOfStarttimeAndEarliestActivityEnd"));
+		//config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.valueOf("equiDist"));
+		//config.qsim().setSnapshotPeriod(Double.parseDouble("00:00:00"));
+		//config.qsim().setStartTime("undefined");
+		//config.qsim().setStorageCapFactor(1.0);
+		//config.qsim().setStuckTime(108000.0);
+		//config.qsim().setTimeStepSize(Double.parseDouble("00:00:01"));
+		//config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.valueOf("kinematicWaves"));
+		//config.qsim().setUseLanes(false);
 
-		config.qsim().setFlowCapFactor(0.1);
-		config.qsim().setInsertingWaitingVehiclesBeforeDrivingVehicles(false);
-		config.qsim().setNumberOfThreads(8);
+
+//		config.strategy().setExternalExeConfigTemplate(null);
+//		config.strategy().setExternalExeTimeOut(3600);
+//		config.strategy().setMaxAgentPlanMemorySize(1);
+//		config.strategy().setPlanSelectorForRemoval("WorstPlanSelector");
+
+		// hier noch unterschiede zu manser
+
+
+		//<!-- Defines the chain-based modes, seperated by commas -->
+		//config.subtourModeChoice().setChainBasedModes(new String[]{"car,bike"});
+		//<!-- Defines whether car availability must be considered or not. A agent has no car only if it has no license, or never access to a car -->
+		//config.subtourModeChoice().setConsiderCarAvailability(false);
+		//<!-- Defines all the modes available, including chain-based modes, seperated by commas -->
+		//config.subtourModeChoice().setModes(new String[]{"car,pt,bike,walk"});
+
+
+
+
+
+
+		//config.transit().setTransitModes(Collections.singleton("pt"));
+		//<!-- Set this parameter to true if transit should be simulated, false if not. -->
+		config.transit().setUseTransit(true);
+		config.transit().setTransitScheduleFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_transitSchedule_no_bus_in_spandau.xml.gz");
+		config.transit().setVehiclesFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_transitVehicles.xml.gz");
+
 
 
 //		<!-- additional time the router allocates when a line switch happens. Can be interpreted as a 'safety' time that agents need to safely transfer from one line to another -->
@@ -155,20 +204,35 @@ public final class RunMinibus {
 		config.transitRouter().setSearchRadius(1000);
 
 
+//		config.travelTimeCalculator().setAnalyzedModes(Collections.singleton("car"));
+//		config.travelTimeCalculator().setCalculateLinkToLinkTravelTimes(false);
+//		config.travelTimeCalculator().setCalculateLinkTravelTimes(true);
+//		config.travelTimeCalculator().setFilterModes(false);
+//		config.travelTimeCalculator().setMaxTime(10800);
+//		config.travelTimeCalculator().setSeparateModes(false);
+		//<!-- How to deal with congested time bins that have no link entry events. `optimistic' assumes free speed (too optimistic); 'experimental_LastMile' is experimental and probably too pessimistic. -->
+		//config.travelTimeCalculator().setTravelTimeAggregatorType("optimistic");
+		//<!-- The size of the time bin (in sec) into which the link travel times are aggregated for the router -->
+		//config.travelTimeCalculator().setTraveltimeBinSize(900);
+		//<!-- possible values: nullTravelTimeCalculatorArray TravelTimeCalculatorHashMap -->
+		//config.travelTimeCalculator().setTravelTimeCalculatorType("TravelTimeCalculatorArray");
+		//<!-- How to deal with link entry times at different positions during the time bin. Currently supported: average, linearinterpolation -->
+		//config.travelTimeCalculator().setTravelTimeGetterType("average");
+
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 
 		for (Person person: scenario.getPopulation().getPersons().values())	{
 			Plan plan = person.getSelectedPlan();
 			algorithm.run(plan);
-			for (PlanElement element : plan.getPlanElements()) {
-				if (element instanceof Activity) {
-					Activity activity = (Activity) element;
-					if (!Collections.singleton(PtConstants.TRANSIT_ACTIVITY_TYPE).contains(activity.getType())) {
-						activity.setType("h");
-					}
-				}
-			}
+//			for (PlanElement element : plan.getPlanElements()) {
+//				if (element instanceof Activity) {
+//					Activity activity = (Activity) element;
+//					if (!Collections.singleton(PtConstants.TRANSIT_ACTIVITY_TYPE).contains(activity.getType())) {
+//						activity.setType("h");
+//					}
+//				}
+//			}
 		}
 
 		Controler controler = new Controler(scenario);
@@ -180,18 +244,17 @@ public final class RunMinibus {
 
 
 
-		boolean subsidies = false;
+		boolean subsidies = true;
 		if (subsidies) {
 			PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.class);
 			pConfig.setUseSubsidyApproach(true);
 			pConfig.setSubsidyApproach("actBased");
-			pConfig.setGridSize(500); // manser used 300
+			pConfig.setGridSize(300); // manser used 300
 			pConfig.setPassengerCarEquivalents(1);
 			pConfig.setNumberOfIterationsForProspecting(10);
 			pConfig.setServiceAreaFile("");
 			pConfig.setVehicleMaximumVelocity(16.6);
 			pConfig.setRouteProvider("TimeAwareComplexCircleScheduleProvider");
-
 
 		}
 

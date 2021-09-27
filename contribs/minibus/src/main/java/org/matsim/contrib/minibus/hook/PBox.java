@@ -165,7 +165,7 @@ public final class PBox implements POperators {
 			// first check if perPassenger subsidy wanted
 				if (this.pConfig.getSubsidyApproach().equals("perPassenger")){
 
-					double subsidies =1;
+					double subsidies =2;
 
 					for (TransitStopFacility stop : this.pStopsOnly.getFacilities().values()) {
 						actBasedSub.put(stop.getId(), subsidies);
@@ -216,7 +216,7 @@ public final class PBox implements POperators {
 
 				for(TransitStopFacility stop: nbActivitiesAroundStop.keySet())	{
 					double activities = nbActivitiesAroundStop.get(stop).get(0)+ (0.1 * nbActivitiesAroundStop.get(stop).get(1));
-					double subsidies = 100 - ( 5 * Math.pow(2, (activities * 0.0021) ) );
+					double subsidies = 30 - ( 5 * Math.pow(2, (activities * 0.0021) ) );
 
 					if(subsidies > 0.0)	{
 						counter++;

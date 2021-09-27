@@ -129,14 +129,14 @@ public final class RunMinibusCMD {
         for (Person person: scenario.getPopulation().getPersons().values())	{
             Plan plan = person.getSelectedPlan();
             algorithm.run(plan);
-            for (PlanElement element : plan.getPlanElements()) {
-                if (element instanceof Activity) {
-                    Activity activity = (Activity) element;
-                    if (!Collections.singleton(PtConstants.TRANSIT_ACTIVITY_TYPE).contains(activity.getType())) {
-                        activity.setType("h");
-                    }
-                }
-            }
+//            for (PlanElement element : plan.getPlanElements()) {
+//                if (element instanceof Activity) {
+//                    Activity activity = (Activity) element;
+//                    if (!Collections.singleton(PtConstants.TRANSIT_ACTIVITY_TYPE).contains(activity.getType())) {
+//                        activity.setType("h");
+//                    }
+//                }
+//            }
         }
 
 
@@ -146,12 +146,11 @@ public final class RunMinibusCMD {
         controler.addOverridingModule(new PModule());
 
 
-        if (Boolean.parseBoolean(cmd.getOption("use-sub").get())) {
-            PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.class);
+        if (Boolean.parseBoolean(cmd.getOption("use-sub").get())) {            PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.class);
             pConfig.setUseSubsidyApproach(true);
             pConfig.setSubsidyApproach(cmd.getOption("sub-approach").get().toString());
-            pConfig.setGridSize(500); // manser used 300
-            pConfig.setPassengerCarEquivalents(1);
+            //pConfig.setGridSize(500); // manser used 300
+            //pConfig.setPassengerCarEquivalents(1);
             pConfig.setNumberOfIterationsForProspecting(10);
             pConfig.setServiceAreaFile("");
             pConfig.setVehicleMaximumVelocity(16.6);

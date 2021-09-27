@@ -168,7 +168,7 @@ abstract class AbstractOperator implements Operator{
 			vehicleType = getBestPlan().getPVehicleType();
 
 		if (vehicleType == null)
-			vehicleType = "Minibus";
+			vehicleType = "Articulated Bus";
 
 
 		for (PConfigGroup.PVehicleSettings pVS : this.pVehicleSettings) {
@@ -335,17 +335,25 @@ abstract class AbstractOperator implements Operator{
 			totalPassengerKilometer += driverId2ScoreMap.get(vehId).getTotalPassengerKilometer();
 			totalSubsidizedTrips += driverId2ScoreMap.get(vehId).getNumberOfSubsidizedTrips();
 			totalAmountOfSubsidies += driverId2ScoreMap.get(vehId).getAmountOfSubsidies();
+			//System.out.println("subsidy2"+totalAmountOfSubsidies);
 		}
 
 		double costPerVehicleDay = 0;
+		double costPerVehicleSell = 0;
 		for (PConfigGroup.PVehicleSettings pVS : this.pVehicleSettings) {
 			if (plan.getPVehicleType().equals(pVS.getPVehicleName())) {
 				costPerVehicleDay = pVS.getCostPerVehicleAndDay();
+				costPerVehicleSell = pVS.getCostPerVehicleSold();
+
 			}
 		}
 
 
-		totalLineScore = capAndAddRouteDesignScore (plan, totalLineScore, routeDesignScoringManager);
+		totalLineScore = totalLineScore - plan.getNVehicles() * costPerVehicleDay;
+
+		//gregor leich modification
+
+		//totalLineScore = capAndAddRouteDesignScore (plan, totalLineScore, routeDesignScoringManager,costPerVehicleDay,costPerVehicleSell);
 
 		plan.setScore(totalLineScore);
 		plan.setTripsServed(totalTripsServed);
@@ -357,7 +365,7 @@ abstract class AbstractOperator implements Operator{
 		plan.setTotalAmountOfSubsidies(totalAmountOfSubsidies);
 	}
 	
-	private double capAndAddRouteDesignScore (PPlan plan, double originaltotalLineScore, RouteDesignScoringManager routeDesignScoringManager) {
+	private double capAndAddRouteDesignScore (PPlan plan, double originaltotalLineScore, RouteDesignScoringManager routeDesignScoringManager,double costPerVehicleDay,double costPerVehicleSell) {
 		double totalLineScore = originaltotalLineScore;
 		
 		if (routeDesignScoringManager.isActive()) {
@@ -376,8 +384,11 @@ abstract class AbstractOperator implements Operator{
 
 				//Meyer:
 				//TODO replace 500 with the cost per vehicle sell depending on vehicle type
-				
-				double minScoreToSurvive = -500 * plan.getNVehicles();
+
+
+
+
+				double minScoreToSurvive = -costPerVehicleSell * plan.getNVehicles();
 				if (originaltotalLineScore >= minScoreToSurvive) {
 					/*
 					 * Limit negative score to the amount at which the plan is eliminated. Multiply
@@ -385,7 +396,7 @@ abstract class AbstractOperator implements Operator{
 					 * has an influence on busy lines.
 					 */
 					totalLineScore = Math.max(originaltotalLineScore + routeDesignScore * plan.getNVehicles(),
-							minScoreToSurvive - 0.0001 * 500);
+							minScoreToSurvive - 0.0001 * costPerVehicleSell);
 				} else {
 					// plan already has a bad score that will cause its elimination, don't cap this
 					// monetary cost
