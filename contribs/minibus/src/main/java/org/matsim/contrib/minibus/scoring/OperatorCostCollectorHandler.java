@@ -102,6 +102,7 @@ public final class OperatorCostCollectorHandler implements TransitDriverStartsEv
 
 		for (PVehicleSettings pVS : this.pVehicleSettings) {
 			if (event.getVehicleId().toString().contains(pVS.getPVehicleName())) {
+
 				costPerVehicleAndDay = pVS.getCostPerVehicleAndDay();
 				expensesPerMeter = pVS.getCostPerKilometer() / 1000.0;
 				expensesPerSecond = pVS.getCostPerHour() / 3600.0;

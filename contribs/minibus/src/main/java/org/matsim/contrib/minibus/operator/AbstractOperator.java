@@ -173,6 +173,7 @@ abstract class AbstractOperator implements Operator{
 
 		for (PConfigGroup.PVehicleSettings pVS : this.pVehicleSettings) {
 			if (vehicleType.equals(pVS.getPVehicleName())) {
+
 				costPerVehicleDay = pVS.getCostPerVehicleAndDay();
 				costPerVehicleSell = pVS.getCostPerVehicleSold();
 			}
@@ -342,6 +343,7 @@ abstract class AbstractOperator implements Operator{
 		double costPerVehicleSell = 0;
 		for (PConfigGroup.PVehicleSettings pVS : this.pVehicleSettings) {
 			if (plan.getPVehicleType().equals(pVS.getPVehicleName())) {
+
 				costPerVehicleDay = pVS.getCostPerVehicleAndDay();
 				costPerVehicleSell = pVS.getCostPerVehicleSold();
 
