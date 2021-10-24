@@ -81,9 +81,9 @@ public final class RunMinibusCMD {
         config.network().setInputFile(networkpath);
 
         config.global().setCoordinateSystem("EPSG:31468");
-        config.global().setNumberOfThreads(32);
-        config.parallelEventHandling().setNumberOfThreads(32);
-        config.qsim().setNumberOfThreads(32);
+        //config.global().setNumberOfThreads(32);
+        //config.parallelEventHandling().setNumberOfThreads(1);
+        //config.qsim().setNumberOfThreads(32);
 
         config.controler().setLastIteration(400);
         if (cmd.hasOption("iterations")) {
@@ -151,10 +151,10 @@ public final class RunMinibusCMD {
             pConfig.setSubsidyApproach(cmd.getOption("sub-approach").get().toString());
             //pConfig.setGridSize(500); // manser used 300
             //pConfig.setPassengerCarEquivalents(1);
-            pConfig.setNumberOfIterationsForProspecting(10);
-            pConfig.setServiceAreaFile("");
-            pConfig.setVehicleMaximumVelocity(16.6);
-            pConfig.setRouteProvider("TimeAwareComplexCircleScheduleProvider");
+            //pConfig.setNumberOfIterationsForProspecting(10);
+            //pConfig.setServiceAreaFile("");
+            //pConfig.setVehicleMaximumVelocity(16.6);
+            //pConfig.setRouteProvider("TimeAwareComplexCircleScheduleProvider");
         }
 
 

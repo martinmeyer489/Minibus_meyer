@@ -55,7 +55,7 @@ import org.matsim.vehicles.Vehicle;
 
 /**
  * Same as {@link ComplexCircleScheduleProvider}, but sets travel times according to the realized travel times of the last iteration.
- * 
+ *
  * @author aneumann
  *
  */
@@ -63,7 +63,7 @@ final class TimeAwareComplexCircleScheduleProvider implements PRouteProvider{
 
 	private final static Logger log = Logger.getLogger(TimeAwareComplexCircleScheduleProvider.class);
 	public final static String NAME = "TimeAwareComplexCircleScheduleProvider";
-	
+
 	private final Network net;
 	private final LeastCostPathCalculator routingAlgo;
 	private final TransitSchedule scheduleWithStopsOnly;
@@ -74,7 +74,7 @@ final class TimeAwareComplexCircleScheduleProvider implements PRouteProvider{
 	private final double vehicleMaximumVelocity;
 	private final double planningSpeedFactor;
 	private final double driverRestTime;
-	
+
 	private final TimeAwareComplexCircleScheduleProviderHandler handler;
 	private final String transportMode;
 	private PPlan pOperatorPlan;
@@ -94,7 +94,7 @@ final class TimeAwareComplexCircleScheduleProvider implements PRouteProvider{
 //			add(TransportMode.pt);
 			}};
 		((Dijkstra)this.routingAlgo).setModeRestriction(modes);
-		
+
 		// register all stops by their corresponding link id
 		this.linkId2StopFacilityMap = new LinkedHashMap<>();
 		for (TransitStopFacility stop : this.scheduleWithStopsOnly.getFacilities().values()) {
@@ -104,19 +104,19 @@ final class TimeAwareComplexCircleScheduleProvider implements PRouteProvider{
 				this.linkId2StopFacilityMap.put(stop.getLinkId(), stop);
 			}
 		}
-		
+
 		this.randomStopProvider = randomStopProvider;
 		this.randomPVehicleProvider = randomPVehicleProvider;
 
 		this.vehicleMaximumVelocity = vehicleMaximumVelocity;
 		this.planningSpeedFactor = planningSpeedFactor;
 		this.driverRestTime = driverRestTime;
-		
+
 		this.handler = new TimeAwareComplexCircleScheduleProviderHandler(pIdentifier);
 		eventsManager.addHandler(this.handler);
 		this.transportMode = transportMode;
 	}
-	
+
 //	@Override
 //	public TransitLine createTransitLineFromOperatorPlan(Id<Operator> operatorId, PPlan plan){
 //		return this.createTransitLine(Id.create(operatorId, TransitLine.class), plan.getStartTime(), plan.getEndTime(), plan.getNVehicles(), plan.getStopsToBeServed(), Id.create(plan.getId(), TransitRoute.class));
@@ -312,7 +312,8 @@ private TransitRoute createRoute(Id<TransitRoute> routeID, ArrayList<TransitStop
 			}
 
 			// hier muss jetzt geprüft werden, ob die Anzahl Aktivitäten überdurchschnittlich hoch sind
-			if(this.randomStopProvider.hasHighNumberOfActivitiesInGrid(gridNode))	{
+//			if(this.randomStopProvider.hasHighNumberOfActivitiesInGrid(gridNode))	{
+			if(true)	{
 
 				// different from {@link ComplexCircleScheduleProvider}
 				if(isSameStopSequenceAsLastIteration)	{
@@ -447,7 +448,7 @@ private TransitRoute createRoute(Id<TransitRoute> routeID, ArrayList<TransitStop
 	public TransitStopFacility getRandomTransitStop(int currentIteration){
 		return this.randomStopProvider.getRandomTransitStop(currentIteration);
 	}
-	
+
 	@Override
 	public TransitStopFacility drawRandomStopFromList(List<TransitStopFacility> choiceSet) {
 		return this.randomStopProvider.drawRandomStopFromList(choiceSet);
@@ -462,7 +463,7 @@ private TransitRoute createRoute(Id<TransitRoute> routeID, ArrayList<TransitStop
 	public Collection<TransitStopFacility> getAllPStops() {
 		return this.scheduleWithStopsOnly.getFacilities().values();
 	}
-	
+
 	private double modifyRunningTimeAccordingToTheLastIterationIfPossible(double runningTime, double offsetFromLastIteration){
 		if (offsetFromLastIteration != -Double.MAX_VALUE) {
 			runningTime = offsetFromLastIteration;
@@ -481,3 +482,5 @@ private TransitRoute createRoute(Id<TransitRoute> routeID, ArrayList<TransitStop
 		return this.randomPVehicleProvider.getSmallestPVehicle();
 	}
 }
+
+

@@ -92,7 +92,7 @@ public final class RunMinibus {
 
 		// input file
 
-		Config config = ConfigUtils.loadConfig( "C:/Users/marti/Documents/MA/input/config/config_tirachini.xml", new PConfigGroup() ) ;
+		Config config = ConfigUtils.loadConfig( "C:/Users/marti/Documents/MA/input/v5.5/v5.5_1pct_only_test/berlin-v5.5.3-1pct.output_config_p_module.xml", new PConfigGroup() ) ;
 //		Config config = ConfigUtils.loadConfig("/Users/MeyerMa/IdeaProjects/minibus_meyer/Input/config.xml", new PConfigGroup() ) ;
 		config.network().setInputFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_network.xml.gz");
 		config.global().setCoordinateSystem("EPSG:31468");
@@ -100,10 +100,12 @@ public final class RunMinibus {
 		config.global().setNumberOfThreads(8);
 
 		//config.plans().setInputFile("C:/Users/marti/Documents/MA/input/v5.4/v5.4_10pct/berlin-v5.4-10pct.plans_act_inside_prep.xml.gz");
-		config.plans().setInputFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.4-1pct.plans_activity_inside_prep.xml");
-		config.plans().setRemovingUnneccessaryPlanAttributes(true);
+		//config.plans().setInputFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.4-1pct.plans_activity_inside_prep2.xml");
+		config.plans().setInputFile("C:/Users/marti/Documents/MA/input/v5.5/v5.5_1pct_only_test/berlin-v5.5-1pct.plans_act_inside_prep.xml.gz");
+
+		//config.plans().setRemovingUnneccessaryPlanAttributes(true);
 		config.plans().setHandlingOfPlansWithoutRoutingMode(useMainModeIdentifier);
-		config.plans().setNetworkRouteType("LinkNetworkRoute");
+		//config.plans().setNetworkRouteType("LinkNetworkRoute");
 
 		MainModeIdentifier mainModeIdentifier = new MainModeIdentifierImpl();
 
@@ -119,11 +121,12 @@ public final class RunMinibus {
 
 
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_test_vehicletypes_no_sub_new_headway_gelenkbus_default_operator_15_new");
+		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_1pct_vehicletypes_actbased_30_5_config_tirachini_allcarlinks");
 		config.controler().setRunId("per_passenger_1");
 		config.controler().setLastIteration(400);
 		config.controler().setWriteEventsInterval(400);
 		config.controler().setWritePlansInterval(400);
+
 		//config.controler().setWriteSnapshotsInterval(1);
 		//config.controler().setRoutingAlgorithmType(ControlerConfigGroup.RoutingAlgorithmType.valueOf("Dijkstra")); //manser used Dijlstra and i use a star landmarks
 		//config.controler().setCompressionType(ControlerConfigGroup.CompressionType.valueOf("none"));
@@ -137,7 +140,7 @@ public final class RunMinibus {
 
 
 		//config.plansCalcRoute().setNetworkModes(Collections.singleton("car"));
-		config.plansCalcRoute().setRoutingRandomness(3);
+		//config.plansCalcRoute().setRoutingRandomness(3);
 
 
 		//config.qsim().setEndTime(Double.parseDouble("30:00:00"));
@@ -193,15 +196,15 @@ public final class RunMinibus {
 
 
 //		<!-- additional time the router allocates when a line switch happens. Can be interpreted as a 'safety' time that agents need to safely transfer from one line to another -->
-		config.transitRouter().setAdditionalTransferTime(0);
+		//config.transitRouter().setAdditionalTransferTime(0);
 		//		<!-- Factor with which direct walk generalized cost is multiplied before it is compared to the pt generalized cost.  Set to a very high value to reduce direct walk results. -->
-		config.transitRouter().setDirectWalkFactor(1);
+		//config.transitRouter().setDirectWalkFactor(1);
 		//		<!-- step size to increase searchRadius if no stops are found -->
-		config.transitRouter().setExtensionRadius(200);
+		//config.transitRouter().setExtensionRadius(200);
 		//		<!-- maximum beeline distance between stops that agents could transfer to by walking -->
-		config.transitRouter().setMaxBeelineWalkConnectionDistance(100);
+		//config.transitRouter().setMaxBeelineWalkConnectionDistance(100);
 		//		<!-- the radius in which stop locations are searched, given a start or target coordinate -->
-		config.transitRouter().setSearchRadius(1000);
+		//config.transitRouter().setSearchRadius(1000);
 
 
 //		config.travelTimeCalculator().setAnalyzedModes(Collections.singleton("car"));
@@ -244,19 +247,19 @@ public final class RunMinibus {
 
 
 
-		boolean subsidies = true;
-		if (subsidies) {
-			PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.class);
-			pConfig.setUseSubsidyApproach(true);
-			pConfig.setSubsidyApproach("actBased");
-			pConfig.setGridSize(300); // manser used 300
-			pConfig.setPassengerCarEquivalents(1);
-			pConfig.setNumberOfIterationsForProspecting(10);
-			pConfig.setServiceAreaFile("");
-			pConfig.setVehicleMaximumVelocity(16.6);
-			pConfig.setRouteProvider("TimeAwareComplexCircleScheduleProvider");
-
-		}
+//		boolean subsidies = true;
+//		if (subsidies) {
+//			PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.class);
+//			pConfig.setUseSubsidyApproach(true);
+//			pConfig.setSubsidyApproach("actBased");
+//			//pConfig.setGridSize(250); // manser used 300
+//			//pConfig.setPassengerCarEquivalents(0.3);
+//			//pConfig.setNumberOfIterationsForProspecting(10);
+//			pConfig.setServiceAreaFile("");
+//			pConfig.setVehicleMaximumVelocity(16.6);
+//			pConfig.setRouteProvider("TimeAwareComplexCircleScheduleProvider");
+//
+//		}
 
 
 		controler.run();
