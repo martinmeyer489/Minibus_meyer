@@ -171,7 +171,14 @@ public final class PPlan implements Comparable<PPlan>{
 	}
 
 	public void setPVehicleType(String pVehicleType)	{
+
+//		for (TransitRoute route : this.line.getRoutes().values()) {
+//			for (Departure departure : route.getDepartures().values()) {
+//
+//			}
+//		}
 		this.pVehicleType = pVehicleType;
+
 	}
 
 		public ArrayList<TransitStopFacility> getStopsToBeServed() {

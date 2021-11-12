@@ -351,11 +351,11 @@ abstract class AbstractOperator implements Operator{
 		}
 
 
-		totalLineScore = totalLineScore - plan.getNVehicles() * costPerVehicleDay;
+		//totalLineScore = totalLineScore - plan.getNVehicles() * costPerVehicleDay;
 
 		//gregor leich modification
 
-		//totalLineScore = capAndAddRouteDesignScore (plan, totalLineScore, routeDesignScoringManager,costPerVehicleDay,costPerVehicleSell);
+		totalLineScore = capAndAddRouteDesignScore (plan, totalLineScore, routeDesignScoringManager,costPerVehicleDay,costPerVehicleSell);
 
 		plan.setScore(totalLineScore);
 		plan.setTripsServed(totalTripsServed);
@@ -388,7 +388,7 @@ abstract class AbstractOperator implements Operator{
 				//TODO replace 500 with the cost per vehicle sell depending on vehicle type
 
 
-
+				System.out.println("############cost per vehicle sell"+costPerVehicleSell);
 
 				double minScoreToSurvive = -costPerVehicleSell * plan.getNVehicles();
 				if (originaltotalLineScore >= minScoreToSurvive) {

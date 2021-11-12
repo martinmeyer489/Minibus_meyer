@@ -65,59 +65,59 @@ public class PPlanRouter implements PlanAlgorithm, PersonAlgorithm {
 	public TripRouter getTripRouter() {
 		return routingHandler;
 	}
+// for mode choice to work
+	@Override
+	public void run(final Plan plan) {
+		final List<Trip> trips = TripStructureUtils.getTrips( plan );
+
+		for (Trip oldTrip : trips) {
+			boolean hasParaLeg = hasParaLeg(oldTrip);
+			final String routingMode = TripStructureUtils.identifyMainMode( oldTrip.getTripElements() );
+
+			if(hasParaLeg) {
+				final List<? extends PlanElement> newTrip =
+						routingHandler.calcRoute(
+								routingMode,
+								FacilitiesUtils.toFacility( oldTrip.getOriginActivity(), facilities ),
+								FacilitiesUtils.toFacility( oldTrip.getDestinationActivity(), facilities ),
+								calcEndOfActivity( oldTrip.getOriginActivity() , plan, routingHandler.getConfig() ),
+								plan.getPerson() );
+				putVehicleFromOldTripIntoNewTripIfMeaningful(oldTrip, newTrip);
+				TripRouter.insertTrip(
+						plan,
+						oldTrip.getOriginActivity(),
+						newTrip,
+						oldTrip.getDestinationActivity());
+			}
+		}
+	}
 
 //	@Override
 //	public void run(final Plan plan) {
 //		final List<Trip> trips = TripStructureUtils.getTrips( plan );
 //
-//		for (Trip oldTrip : trips) {
-//			boolean hasParaLeg = hasParaLeg(oldTrip);
-//			final String routingMode = TripStructureUtils.identifyMainMode( oldTrip.getTripElements() );
+//		for (Trip trip : trips) {
 //
-//			if(hasParaLeg) {
+//
+//			/** That's the only check that got added.... **/
+//			if (TripStructureUtils.identifyMainMode(trip.getTripElements()).equals(TransportMode.pt)) {
 //				final List<? extends PlanElement> newTrip =
 //						routingHandler.calcRoute(
-//								routingMode,
-//								FacilitiesUtils.toFacility( oldTrip.getOriginActivity(), facilities ),
-//								FacilitiesUtils.toFacility( oldTrip.getDestinationActivity(), facilities ),
-//								calcEndOfActivity( oldTrip.getOriginActivity() , plan, routingHandler.getConfig() ),
+//								TripStructureUtils.identifyMainMode( trip.getTripElements() ),
+//								toFacility( trip.getOriginActivity() ),
+//								toFacility( trip.getDestinationActivity() ),
+//								calcEndOfActivity( trip.getOriginActivity() , plan ),
 //								plan.getPerson() );
-//				putVehicleFromOldTripIntoNewTripIfMeaningful(oldTrip, newTrip);
+//
 //				TripRouter.insertTrip(
 //						plan,
-//						oldTrip.getOriginActivity(),
+//						trip.getOriginActivity(),
 //						newTrip,
-//						oldTrip.getDestinationActivity());
+//						trip.getDestinationActivity());
 //			}
+//
 //		}
 //	}
-
-	@Override
-	public void run(final Plan plan) {
-		final List<Trip> trips = TripStructureUtils.getTrips( plan );
-
-		for (Trip trip : trips) {
-
-
-			/** That's the only check that got added.... **/
-			if (TripStructureUtils.identifyMainMode(trip.getTripElements()).equals(TransportMode.pt)) {
-				final List<? extends PlanElement> newTrip =
-						routingHandler.calcRoute(
-								TripStructureUtils.identifyMainMode( trip.getTripElements() ),
-								toFacility( trip.getOriginActivity() ),
-								toFacility( trip.getDestinationActivity() ),
-								calcEndOfActivity( trip.getOriginActivity() , plan ),
-								plan.getPerson() );
-
-				TripRouter.insertTrip(
-						plan,
-						trip.getOriginActivity(),
-						newTrip,
-						trip.getDestinationActivity());
-			}
-
-		}
-	}
 
 
 	// /////////////////////////////////////////////////////////////////////////

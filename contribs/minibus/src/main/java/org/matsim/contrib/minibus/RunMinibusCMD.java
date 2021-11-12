@@ -85,7 +85,7 @@ public final class RunMinibusCMD {
         //config.parallelEventHandling().setNumberOfThreads(1);
         //config.qsim().setNumberOfThreads(32);
 
-        config.controler().setLastIteration(400);
+        config.controler().setLastIteration(600);
         if (cmd.hasOption("iterations")) {
             config.controler().setLastIteration(Integer.parseInt(cmd.getOption("iterations").get()));
         }

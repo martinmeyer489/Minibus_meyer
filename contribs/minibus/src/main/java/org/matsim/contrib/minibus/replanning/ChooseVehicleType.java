@@ -78,6 +78,9 @@ public final class ChooseVehicleType extends AbstractPStrategyModule {
         newPlan.setStopsToBeServed(oldPlan.getStopsToBeServed());
 
         newPlan.setScore(0.0);
+//        for(TransitRoute line :newPlan.getLine().getRoutes().values()){
+//
+//        }
         newPlan.setPVehicleType(pVehicleTypeNew);
 
 

@@ -38,6 +38,11 @@
       <url>https://repo.osgeo.org/repository/release/</url>
     </repository>
     <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
+
+    <repository>
       <!-- Repository for MATSim (MATSim is not on Maven central, releases and snapshots) -->
       <id>matsim</id>
       <url>https://repo.matsim.org/repository/matsim</url>
@@ -92,10 +97,16 @@
     </dependency>
 
     <!--some contribs:-->
+<!--    <dependency>-->
+<!--      <groupId>org.matsim.contrib</groupId>-->
+<!--      <artifactId>minibus</artifactId>-->
+<!--      <version>${matsim.version}</version>-->
+<!--    </dependency>-->
+
     <dependency>
-      <groupId>org.matsim.contrib</groupId>
-      <artifactId>minibus</artifactId>
-      <version>${matsim.version}</version>
+      <groupId>com.github.matsim-scenarios</groupId>
+      <artifactId>matsim-berlin</artifactId>
+      <version>5.5.3</version>
     </dependency>
     <dependency>
       <groupId>org.matsim.contrib</groupId>
@@ -105,6 +116,11 @@
     <dependency>
       <groupId>org.matsim.contrib</groupId>
       <artifactId>otfvis</artifactId>
+      <version>${matsim.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.matsim.contrib</groupId>
+      <artifactId>dvrp</artifactId>
       <version>${matsim.version}</version>
     </dependency>
     <dependency>

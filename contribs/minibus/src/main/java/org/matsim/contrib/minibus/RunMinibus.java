@@ -101,7 +101,7 @@ public final class RunMinibus {
 
 		//config.plans().setInputFile("C:/Users/marti/Documents/MA/input/v5.4/v5.4_10pct/berlin-v5.4-10pct.plans_act_inside_prep.xml.gz");
 		//config.plans().setInputFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.4-1pct.plans_activity_inside_prep2.xml");
-		config.plans().setInputFile("C:/Users/marti/Documents/MA/input/v5.5/v5.5_1pct_only_test/berlin-v5.5-1pct.plans_act_inside_prep.xml.gz");
+		config.plans().setInputFile("C:/Users/marti/Documents/MA/input/v5.4/berlin-v5.4-10pct.plans-plans-inside-prep.xml.gz");
 
 		//config.plans().setRemovingUnneccessaryPlanAttributes(true);
 		config.plans().setHandlingOfPlansWithoutRoutingMode(useMainModeIdentifier);
@@ -121,7 +121,7 @@ public final class RunMinibus {
 
 
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_1pct_vehicletypes_actbased_30_5_config_tirachini_allcarlinks");
+		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_1pct_vehicletypes_actbased_30_5_config_tirachini_allcarlinks_5.4");
 		config.controler().setRunId("per_passenger_1");
 		config.controler().setLastIteration(400);
 		config.controler().setWriteEventsInterval(400);
@@ -190,7 +190,7 @@ public final class RunMinibus {
 		//config.transit().setTransitModes(Collections.singleton("pt"));
 		//<!-- Set this parameter to true if transit should be simulated, false if not. -->
 		config.transit().setUseTransit(true);
-		config.transit().setTransitScheduleFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_transitSchedule_no_bus_in_spandau.xml.gz");
+		config.transit().setTransitScheduleFile("C:/Users/marti/Documents/MA/input/v5.4/berlin-v5.5-transit-schedule-no-bus-in-spandau.xml.gz");
 		config.transit().setVehiclesFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_transitVehicles.xml.gz");
 
 
@@ -247,11 +247,11 @@ public final class RunMinibus {
 
 
 
-//		boolean subsidies = true;
-//		if (subsidies) {
-//			PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.class);
-//			pConfig.setUseSubsidyApproach(true);
-//			pConfig.setSubsidyApproach("actBased");
+		boolean subsidies = true;
+		if (subsidies) {
+			PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.class);
+			pConfig.setUseSubsidyApproach(true);
+			pConfig.setSubsidyApproach("actBased");
 //			//pConfig.setGridSize(250); // manser used 300
 //			//pConfig.setPassengerCarEquivalents(0.3);
 //			//pConfig.setNumberOfIterationsForProspecting(10);
@@ -259,7 +259,7 @@ public final class RunMinibus {
 //			pConfig.setVehicleMaximumVelocity(16.6);
 //			pConfig.setRouteProvider("TimeAwareComplexCircleScheduleProvider");
 //
-//		}
+		}
 
 
 		controler.run();

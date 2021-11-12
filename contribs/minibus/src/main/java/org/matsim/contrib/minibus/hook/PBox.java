@@ -204,7 +204,7 @@ public final class PBox implements POperators {
 				}
 
 
-//			File stops = new File("/Users/MeyerMa/Desktop/MA/scenarios/berlin/output/subsidy/activites.csv");
+//			File stops = new File("C:/Users/marti/Documents/MA/input/subsidy_stops_act_based_50_10.csv");
 //			FileWriter fw_stops = new FileWriter(stops);
 //			BufferedWriter bw_stops = new BufferedWriter(fw_stops);
 //
@@ -216,10 +216,13 @@ public final class PBox implements POperators {
 
 				for(TransitStopFacility stop: nbActivitiesAroundStop.keySet())	{
 					double activities = nbActivitiesAroundStop.get(stop).get(0)+ (0.1 * nbActivitiesAroundStop.get(stop).get(1));
-					double subsidies = 2 - ( 0.05 * Math.pow(2, (activities * 0.0021) ) );
+					double subsidies = 50 - ( 10 * Math.pow(2, (activities * 0.0021) ) );
 
 					if(subsidies > 0.0)	{
 						counter++;
+//						bw_stops.write(String.valueOf(stop.getId())+","+String.valueOf(stop.getCoord().getX())+","+String.valueOf(stop.getCoord().getY())+","+String.valueOf(activities)+","+String.valueOf(nbActivitiesAroundStop.get(stop).get(0))+","+String.valueOf(nbActivitiesAroundStop.get(stop).get(0))+","+String.valueOf(subsidies));
+//						bw_stops.newLine();
+
 						actBasedSub.put(stop.getId(), subsidies);
 					}
 				}
