@@ -384,11 +384,9 @@ abstract class AbstractOperator implements Operator{
 				 */
 
 
-				//Meyer:
-				//TODO replace 500 with the cost per vehicle sell depending on vehicle type
 
 
-				System.out.println("############cost per vehicle sell"+costPerVehicleSell);
+				//System.out.println("############cost per vehicle sell"+costPerVehicleSell);
 
 				double minScoreToSurvive = -costPerVehicleSell * plan.getNVehicles();
 				if (originaltotalLineScore >= minScoreToSurvive) {

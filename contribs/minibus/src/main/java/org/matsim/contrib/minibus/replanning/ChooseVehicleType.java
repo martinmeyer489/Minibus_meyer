@@ -199,6 +199,7 @@ public final class ChooseVehicleType extends AbstractPStrategyModule {
 
 			/*
 			log.info(" ");
+			log.info(" ");
 			log.info("Operator " + operator.getId() + " Old Plan " + oldPlan.getId());
 			log.info("Old vehicle type " + pVehicleTypeOld + " number of vehicles: " +nVehicles);
 			log.info("New vehicle type " + pVehicleTypeNew + " number of vehicles: " +newPlan.getNVehicles());

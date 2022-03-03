@@ -91,7 +91,7 @@ public final class RunDrtMinibusOpenBerlinScenario {
 
 		if ( args.length==0 ) {
 
-			args = new String[] {"C:/Users/marti/IdeaProjects/matsim-berlin/scenarios/berlin-v5.5-1pct/input/drt/berlin-drt-v5.5-1pct.config_minibus_vehtypes.xml"}  ;
+			args = new String[] {"C:/Users/marti/Documents/MA/input/config/drt_minibus.xml"}  ;
 
 //			args = new String[] {"berlin-drt-v5.5-10pct.config.xml"}  ;
 		}
@@ -99,7 +99,7 @@ public final class RunDrtMinibusOpenBerlinScenario {
 		Config config = prepareConfig( args ) ;
 		Scenario scenario = prepareScenario( config ) ;
 //		config.controler().setLastIteration(0);
-		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_1pct_vehicletypes_minibus_drt_3");
+//		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_1pct_vehicletypes_minibus_drt_3");
 		config.plans().setHandlingOfPlansWithoutRoutingMode(PlansConfigGroup.HandlingOfPlansWithoutRoutingMode.useMainModeIdentifier);
 		Controler controler = prepareControler( scenario ) ;
 
@@ -149,7 +149,7 @@ public final class RunDrtMinibusOpenBerlinScenario {
 		BerlinExperimentalConfigGroup berlinCfg = ConfigUtils.addOrGetModule(config, BerlinExperimentalConfigGroup.class);
 
 		for (DrtConfigGroup drtCfg : MultiModeDrtConfigGroup.get(config).getModalElements()) {
-			drtCfg.setPlotDetailedCustomerStats(false);
+//			drtCfg.setPlotDetailedCustomerStats(false);
 
 			String drtServiceAreaShapeFile = drtCfg.getDrtServiceAreaShapeFile();
 			if (drtServiceAreaShapeFile != null && !drtServiceAreaShapeFile.equals("") && !drtServiceAreaShapeFile.equals("null")) {
@@ -207,6 +207,12 @@ public final class RunDrtMinibusOpenBerlinScenario {
 
 		config.timeAllocationMutator().setAffectingDuration(false);
 		//config.controler().setLastIteration(30);
+		config.network().setInputFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_network.xml.gz");
+		config.plans().setInputFile("C:/Users/marti/Documents/MA/input/v5.4/berlin-v5.4-0.1pct.plans-inside-prep.xml.gz");
+		config.transit().setTransitScheduleFile("C:/Users/marti/Documents/MA/input/v5.4/berlin-v5.5-transit-schedule-only-bus-in-spandau.xml.gz");
+		config.vehicles().setVehiclesFile("C:/Users/marti/Documents/MA/input/berlin-v5-mode-vehicle-types.xml");
+		config.transit().setVehiclesFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_transitVehicles.xml.gz");
+
 		//config.controler().setDumpDataAtEnd(true);
 //		config.controler().setOutputDirectory("");
 

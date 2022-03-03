@@ -144,10 +144,18 @@ final class TimeAwareComplexCircleScheduleProvider implements PRouteProvider{
 		int n = 0;
 
 		int headway = (int) (this.driverRestTime + transitRoute.getStops().get(transitRoute.getStops().size() - 1).getDepartureOffset().seconds()) / numberOfVehicles;
+		//System.out.println("transitline " +transitRoute);
+		//System.out.println("starttime "+startTime);
+		//System.out.println("headway "+headway);
+		//System.out.println("endtime "+endTime);
+		//System.out.println("number of vehic "+numberOfVehicles);
+
+		int num_depart=0;
+
 		for (int i = 0; i < numberOfVehicles; i++) {
 			for (double j = startTime + i * headway; j <= endTime; ) {
 				Departure departure = this.scheduleWithStopsOnly.getFactory().createDeparture(Id.create(n, Departure.class), j);
-
+				num_depart=num_depart+1;
 				departure.setVehicleId(Id.create(transitRoute.getId().toString() + "-" + i +"_" + pVehicleType, Vehicle.class));
 				//departure.setVehicleId(Id.create(vehicleIdNew + "-" + i, Vehicle.class));
 				transitRoute.addDeparture(departure);
@@ -155,6 +163,7 @@ final class TimeAwareComplexCircleScheduleProvider implements PRouteProvider{
 				n++;
 			}
 		}
+		//System.out.println("number of departures " + num_depart );
 
 //		log.info("added " + n + " departures");
 		return line;

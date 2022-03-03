@@ -22,7 +22,12 @@
 package org.matsim.contrib.minibus;
 
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
@@ -33,8 +38,9 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
-import org.matsim.core.controler.Controler;
-import org.matsim.core.controler.OutputDirectoryHierarchy;
+import org.matsim.core.controler.*;
+import org.matsim.core.network.NetworkUtils;
+import org.matsim.core.network.algorithms.TransportModeNetworkFilter;
 import org.matsim.core.population.algorithms.TripsToLegsAlgorithm;
 import org.matsim.core.router.MainModeIdentifier;
 import org.matsim.core.router.MainModeIdentifierImpl;
@@ -42,6 +48,8 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.PtConstants;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.matsim.core.config.groups.PlansConfigGroup.HandlingOfPlansWithoutRoutingMode.useMainModeIdentifier;
 
@@ -92,16 +100,24 @@ public final class RunMinibus {
 
 		// input file
 
-		Config config = ConfigUtils.loadConfig( "C:/Users/marti/Documents/MA/input/v5.5/v5.5_1pct_only_test/berlin-v5.5.3-1pct.output_config_p_module.xml", new PConfigGroup() ) ;
+		//Config config = ConfigUtils.loadConfig( "C:/Users/marti/Documents/MA/input/config/berlin-v5.5.3-10pct.output_config.xml", new PConfigGroup() ) ;
 //		Config config = ConfigUtils.loadConfig("/Users/MeyerMa/IdeaProjects/minibus_meyer/Input/config.xml", new PConfigGroup() ) ;
-		config.network().setInputFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_network.xml.gz");
-		config.global().setCoordinateSystem("EPSG:31468");
+		Config config= ConfigUtils.loadConfig("C:/Users/marti/Documents/MA/input/Santiago/config/config_baseCase10pct_pmodule.xml", new PConfigGroup() );
+		///config.network().setInputFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_network.xml.gz");
+		config.network().setInputCRS("EPSG:32719");
+		config.network().setInputFile("C:/Users/marti/Documents/MA/input/Santiago/network_merged_cl.xml");
+
+		config.global().setCoordinateSystem("EPSG:32719");
+		//config.global().setCoordinateSystem("EPSG:31468");
 		config.global().setRandomSeed(2);
 		config.global().setNumberOfThreads(8);
 
-		//config.plans().setInputFile("C:/Users/marti/Documents/MA/input/v5.4/v5.4_10pct/berlin-v5.4-10pct.plans_act_inside_prep.xml.gz");
+		//config.plans().setInputFile("C:/Users/marti/Documents/MA/input/plans/berlin-v5.4-10pct.plans-plans-inside-prep.xml.gz");
 		//config.plans().setInputFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.4-1pct.plans_activity_inside_prep2.xml");
-		config.plans().setInputFile("C:/Users/marti/Documents/MA/input/v5.4/berlin-v5.4-10pct.plans-plans-inside-prep.xml.gz");
+		//config.plans().setInputFile("C:/Users/marti/Documents/MA/input/plans/berlin-v5.4-0.1pct.plans-inside-prep.xml.gz");
+		config.plans().setInputCRS("EPSG:32719");
+		config.plans().setInputFile("C:/Users/marti/Documents/MA/input/Santiago/plans/plans_final_inside.xml.gz");
+
 
 		//config.plans().setRemovingUnneccessaryPlanAttributes(true);
 		config.plans().setHandlingOfPlansWithoutRoutingMode(useMainModeIdentifier);
@@ -121,24 +137,15 @@ public final class RunMinibus {
 
 
 		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output_1pct_vehicletypes_actbased_30_5_config_tirachini_allcarlinks_5.4");
+		config.controler().setOutputDirectory("C:/Users/marti/Documents/MA/output/Santiago/output_santiago");
 		config.controler().setRunId("per_passenger_1");
-		config.controler().setLastIteration(400);
-		config.controler().setWriteEventsInterval(400);
-		config.controler().setWritePlansInterval(400);
+		config.controler().setLastIteration(1);
+		config.controler().setWriteEventsInterval(1);
+		config.controler().setWritePlansInterval(1);
 
 		//config.controler().setWriteSnapshotsInterval(1);
 		//config.controler().setRoutingAlgorithmType(ControlerConfigGroup.RoutingAlgorithmType.valueOf("Dijkstra")); //manser used Dijlstra and i use a star landmarks
 		//config.controler().setCompressionType(ControlerConfigGroup.CompressionType.valueOf("none"));
-//
-//		config.planCalcScore().setBrainExpBeta(1);
-//		config.planCalcScore().setPathSizeLogitBeta(1);
-//		config.planCalcScore().setFractionOfIterationsToStartScoreMSA(null);
-//		config.planCalcScore().setLearningRate(1);
-//		config.planCalcScore().setUsingOldScoringBelowZeroUtilityDuration(false);
-//		config.planCalcScore().setWriteExperiencedPlans(false);
-
-
 		//config.plansCalcRoute().setNetworkModes(Collections.singleton("car"));
 		//config.plansCalcRoute().setRoutingRandomness(3);
 
@@ -190,11 +197,18 @@ public final class RunMinibus {
 		//config.transit().setTransitModes(Collections.singleton("pt"));
 		//<!-- Set this parameter to true if transit should be simulated, false if not. -->
 		config.transit().setUseTransit(true);
-		config.transit().setTransitScheduleFile("C:/Users/marti/Documents/MA/input/v5.4/berlin-v5.5-transit-schedule-no-bus-in-spandau.xml.gz");
-		config.transit().setVehiclesFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_transitVehicles.xml.gz");
 
 
+		//config.transit().setTransitScheduleFile("C:/Users/marti/Documents/MA/reference/berlin-v5.5-transit-schedule-only-bus-in-spandau.xml.gz");
+		config.transit().setInputScheduleCRS("EPSG:32719");
 
+		config.transit().setTransitScheduleFile("C:/Users/marti/Documents/MA/input/Santiago/transitschedule_simplified_no_bus.xml");
+
+		//config.transit().setVehiclesFile("C:/Users/marti/Documents/MA/input/current standard input/berlin-v5.5.3-1pct.output_transitVehicles.xml.gz");
+
+		config.transit().setVehiclesFile("C:/Users/marti/Documents/MA/input/Santiago/transitvehicles.xml");
+
+		config.counts().setInputFile("C:/Users/marti/Documents/MA/input/Santiago/counts_merged_VEH_C01.xml");
 //		<!-- additional time the router allocates when a line switch happens. Can be interpreted as a 'safety' time that agents need to safely transfer from one line to another -->
 		//config.transitRouter().setAdditionalTransferTime(0);
 		//		<!-- Factor with which direct walk generalized cost is multiplied before it is compared to the pt generalized cost.  Set to a very high value to reduce direct walk results. -->
@@ -242,7 +256,27 @@ public final class RunMinibus {
 
 		controler.addOverridingModule(new PModule());
 
+		//Adding randomness to the router, sigma = 3
+		//config.plansCalcRoute().setRoutingRandomness(3);
 
+
+		setNetworkModeRouting(controler);
+
+
+
+
+
+		// mapping agents' activities to links on the road network to avoid being stuck on the transit network
+		mapActivities2properLinks(scenario);
+
+
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				this.bind(PrepareForSimImpl.class);
+				this.bind(PrepareForSim.class).to(SantiagoPrepareForSim.class);
+			}
+		});
 
 
 
@@ -255,15 +289,75 @@ public final class RunMinibus {
 //			//pConfig.setGridSize(250); // manser used 300
 //			//pConfig.setPassengerCarEquivalents(0.3);
 //			//pConfig.setNumberOfIterationsForProspecting(10);
-//			pConfig.setServiceAreaFile("");
+			pConfig.setServiceAreaFile("C:/Users/marti/Documents/MA/input/Santiago/puente_alto_32719_service_area_2k_buffer.shp");
 //			pConfig.setVehicleMaximumVelocity(16.6);
 //			pConfig.setRouteProvider("TimeAwareComplexCircleScheduleProvider");
 //
 		}
 
 
+
 		controler.run();
 
+	}
+	private static void mapActivities2properLinks(Scenario scenario) {
+		Network subNetwork = getNetworkWithProperLinksOnly(scenario.getNetwork());
+		for(Person person : scenario.getPopulation().getPersons().values()){
+			for (Plan plan : person.getPlans()) {
+				for (PlanElement planElement : plan.getPlanElements()) {
+					if (planElement instanceof Activity) {
+						Activity act = (Activity) planElement;
+						Id<Link> linkId = act.getLinkId();
+						if(!(linkId == null)){
+							throw new RuntimeException("Link Id " + linkId + " already defined for this activity. Aborting... ");
+						} else {
+							linkId = NetworkUtils.getNearestLink(subNetwork, act.getCoord()).getId();
+							act.setLinkId(linkId);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private static Network getNetworkWithProperLinksOnly(Network network) {
+		Network subNetwork;
+		TransportModeNetworkFilter filter = new TransportModeNetworkFilter(network);
+		Set<String> modes = new HashSet<String>();
+		modes.add(TransportMode.car);
+		subNetwork = NetworkUtils.createNetwork();
+		filter.filter(subNetwork, modes); //remove non-car links
+
+		for(Node n: new HashSet<Node>(subNetwork.getNodes().values())){
+			for(Link l: NetworkUtils.getIncidentLinks(n).values()){
+				if(l.getFreespeed() > (16.666666667)){
+					subNetwork.removeLink(l.getId()); //remove links with freespeed > 60kmh
+				}
+			}
+			if(n.getInLinks().size() == 0 && n.getOutLinks().size() == 0){
+				subNetwork.removeNode(n.getId()); //remove nodes without connection to links
+			}
+		}
+		return subNetwork;
+	}
+
+	private static void setNetworkModeRouting(Controler controler) {
+		controler.addOverridingModule(new AbstractModule() {
+			@Override
+			public void install() {
+				addTravelTimeBinding(TransportMode.ride).to(networkTravelTime());
+				addTravelDisutilityFactoryBinding(TransportMode.ride).to(carTravelDisutilityFactoryKey());
+
+				addTravelTimeBinding(SantiagoScenarioConstants.Modes.taxi.toString()).to(networkTravelTime());
+				addTravelDisutilityFactoryBinding(SantiagoScenarioConstants.Modes.taxi.toString()).to(carTravelDisutilityFactoryKey());
+
+				addTravelTimeBinding(SantiagoScenarioConstants.Modes.colectivo.toString()).to(networkTravelTime());
+				addTravelDisutilityFactoryBinding(SantiagoScenarioConstants.Modes.colectivo.toString()).to(carTravelDisutilityFactoryKey());
+
+				addTravelTimeBinding(SantiagoScenarioConstants.Modes.other.toString()).to(networkTravelTime());
+				addTravelDisutilityFactoryBinding(SantiagoScenarioConstants.Modes.other.toString()).to(carTravelDisutilityFactoryKey());
+			}
+		});
 	}
 
 }

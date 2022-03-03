@@ -68,7 +68,7 @@ public final class WeightedEndTimeExtension extends AbstractPStrategyModule {
 		double newEndTime = this.timeProvider.getRandomTimeInInterval(operator.getBestPlan().getEndTime(), 24 * 3600.0);
 		newPlan.setEndTime(newEndTime);
 		
-		if(newPlan.getEndTime() <= newPlan.getStartTime()){
+		if(newPlan.getEndTime()  <= newPlan.getStartTime()){
 			// Could not find a valid new plan
 			return null;
 		}

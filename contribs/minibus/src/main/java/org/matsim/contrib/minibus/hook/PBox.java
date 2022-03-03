@@ -204,34 +204,44 @@ public final class PBox implements POperators {
 				}
 
 
-//			File stops = new File("C:/Users/marti/Documents/MA/input/subsidy_stops_act_based_50_10.csv");
-//			FileWriter fw_stops = new FileWriter(stops);
-//			BufferedWriter bw_stops = new BufferedWriter(fw_stops);
-//
-//
-//			bw_stops.write("stopID,stop coord x,stop coord y,activity total,activity 500,activity 3000,subsidy");
-//			bw_stops.newLine();
+			File stops = new File("C:/Users/marti/Documents/MA/input/Santiago/subsidy_stops_act_based_50_5.csv");
+			FileWriter fw_stops = new FileWriter(stops);
+			BufferedWriter bw_stops = new BufferedWriter(fw_stops);
+
+
+			bw_stops.write("stopID,stop coord x,stop coord y,activity total,activity 500,activity 3000,subsidy");
+			bw_stops.newLine();
 
 				int counter = 0;
 
 				for(TransitStopFacility stop: nbActivitiesAroundStop.keySet())	{
 					double activities = nbActivitiesAroundStop.get(stop).get(0)+ (0.1 * nbActivitiesAroundStop.get(stop).get(1));
-					double subsidies = 50 - ( 10 * Math.pow(2, (activities * 0.0021) ) );
+					double subsidies = 50 - ( 5 * Math.pow(2, (activities * 0.0021) ) );
 
 					if(subsidies > 0.0)	{
 						counter++;
-//						bw_stops.write(String.valueOf(stop.getId())+","+String.valueOf(stop.getCoord().getX())+","+String.valueOf(stop.getCoord().getY())+","+String.valueOf(activities)+","+String.valueOf(nbActivitiesAroundStop.get(stop).get(0))+","+String.valueOf(nbActivitiesAroundStop.get(stop).get(0))+","+String.valueOf(subsidies));
-//						bw_stops.newLine();
+						bw_stops.write(String.valueOf(stop.getId())+","+String.valueOf(stop.getCoord().getX())+","+String.valueOf(stop.getCoord().getY())+","+String.valueOf(activities)+","+String.valueOf(nbActivitiesAroundStop.get(stop).get(0))+","+String.valueOf(nbActivitiesAroundStop.get(stop).get(0))+","+String.valueOf(subsidies));
+						bw_stops.newLine();
 
 						actBasedSub.put(stop.getId(), subsidies);
 					}
 				}
+				bw_stops.flush();
+				bw_stops.close();
+
 
 
 				log.info("number of subsidized stops: " + counter);
 			}
 
 		}
+
+
+
+
+
+
+
 
 		this.ticketMachine.setActBasedSubs(actBasedSub);
 
@@ -263,6 +273,37 @@ public final class PBox implements POperators {
 		for (Operator operator : this.operators) {
 			this.pTransitSchedule.addTransitLine(operator.getCurrentTransitLine());
 		}
+
+
+
+		// only in 2 iteration
+		//if (event.getIteration()==2){
+			// get operators
+//		double totsub_reference=12000;
+//		double totsub_model=0;
+//		for (Operator operator : getOperators()) {
+//			// get all plans
+//			List<PPlan> plans = operator.getAllPlans();
+//			for (PPlan plan : plans) {
+//				totsub_model+=plan.getTotalAmountOfSubsidies();
+//			}
+//		}
+
+
+//		double sub_normalisation=0;
+//		sub_normalisation=totsub_reference/totsub_model;
+//
+//
+//		log.info("subsidies normalized with factor "+sub_normalisation);
+//		//}
+//
+//		for (Map.Entry<Id<TransitStopFacility>, Double> entry:actBasedSub.entrySet()){
+//
+//			double value= entry.getValue();
+//			entry.setValue(value*sub_normalisation);
+//		}
+//		this.ticketMachine.setActBasedSubs(actBasedSub);
+
 
 		// Reset the franchise system
 		this.franchise.reset(this.operators);
