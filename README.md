@@ -1,20 +1,22 @@
-# Large scale designing of public transport networks
+# Masterthesis: "Design of suburban automated public transport networks using agent-based micro simulation"
 
 This repository was originally a clone from the original [MATSim Minibus Contrib](https://github.com/matsim-org/matsim-libs/tree/master/contribs/minibus),
 which was developed by [Neumann, A (2014)](https://svn.vsp.tu-berlin.de/repos/public-svn/publications/vspwp/2011/11-15/trb_paratransit_submitted_12nov11.pdf).
 
-It is extended for the specific use-case of reproducing and optimizing the formal public transport network of the city of Zurich. The results have been
-published in Manser, P., Becker, H., Hörl, S., & Axhausen, K. W. (2020). [Designing a large-scale public transport network using agent-based microsimulation](https://www.sciencedirect.com/science/article/abs/pii/S0965856420305668). *Transportation Research Part A: Policy and Practice*, **137**, 1-15.
+The extensions made by [Manser] (https://github.com/manserpa/minibus) were adopted and transformed in the MATSim version 13. The paper [Manser, P. (2017)](https://ethz.ch/content/dam/ethz/special-interest/baug/ivt/ivt-dam/publications/students/501-600/sa575.pdf) provides an overview of the extensions made by Manser compared to the original code by Neumann.
 
-The paper and [Manser, P. (2017)](https://ethz.ch/content/dam/ethz/special-interest/baug/ivt/ivt-dam/publications/students/501-600/sa575.pdf) provide an overview of the algorithm and the extensions made in this repository compared to the original code.
+
+
+It is extended for the specific use-case of reproducing and optimizing the formal public transport network of the city of Zurich. The results can be accessed in 
+
+
 
 
 ## Software
 
 The code is very specifically tailored to the Zurich-application.
 
-It uses a [MATSim-10 snapshot as of November 2017](https://dl.bintray.com/matsim-eth/matsim/org/matsim/matsim/0.10.0-nov17/). Further modules are
-necessary to run the code:
+
 
 
 Persons who are interested in applying the software using another scenario are very welcome to ask the author of this repository.
